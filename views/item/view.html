@@ -1,0 +1,193 @@
+{{ define "item/view.html" }}
+
+<!DOCTYPE html>
+<html lang="ko" class="root-text-sm">
+    <head>
+        {{ template "html-head.tmpl" . }}
+    </head>
+
+    <!-- BEGIN Body -->
+    <body class="mod-bg-1 mod-nav-link mod-skin-light">
+
+        {{ template "body-header-script.tmpl" . }}
+
+        <!-- BEGIN Page Wrapper -->
+        <div class="page-wrapper">
+            <div class="page-inner">
+                {{ template "body-left-aside.tmpl" . }}
+
+                <div class="page-content-wrapper">
+
+                    {{ template "page-header.tmpl" . }}
+
+                    <!-- BEGIN Page Content -->
+                    <!-- the #js-page-content id is needed for some plugins to initialize -->
+                    <main id="js-page-content" role="userlist" class="page-content">
+                        <div class="subheader">
+                            <h1 class="subheader-title">
+                                <i class='subheader-icon far fa-ballot-check'></i> <span class='fw-500'>{{.title}}</span>
+                            </h1>
+                        </div>
+                        <div class="row">
+                            <div class="col-xl-6">
+                                <div id="panel-1" class="panel">
+                                    <div class="panel-hdr">
+                                        <h2></h2>
+                                        <div class="panel-toolbar">
+                                            <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
+                                            <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip" data-offset="0,10" data-original-title="Fullscreen"></button>
+                                            <button class="btn btn-panel" data-action="panel-close" data-toggle="tooltip" data-offset="0,10" data-original-title="Close"></button>
+                                        </div>
+                                    </div>
+                                    <div class="panel-container show">
+                                        <div class="panel-content">
+                                            <div class="panel-tag">
+
+                                            </div>
+                                            <form class="needs-validation" id="form-basic" novalidate>
+                                                <input type="hidden" name="ItemNo" id="ItemNo" value="{{ .info.ItemNo }}" />
+                                                <div class="panel-content">
+                                                    <div class="form-row">
+                                                        <div class="col-md-12 mb-3">
+                                                            <label class="form-label" for="CateCode">카테고리 <span class="text-danger">*</span> </label>
+                                                            <select class="custom-select" name="CateCode" id="CateCode" required>
+                                                                <option value="">선택</option>
+                                                                {{ range .catelist }}
+                                                                    <option value="{{.CodeKey}}" {{ if eq $.info.CateCode .CodeKey }} selected {{end}}>{{.CodeLabel}}</option>
+                                                                {{ end }}
+                                                            </select>
+                                                            <div class="invalid-feedback">카테고리를 선택해주세요</div>
+                                                        </div>
+                                                        <div class="col-md-12 mb-3">
+                                                            <label class="form-label" for="ItemName">상품명(내부관리) <span class="text-danger">*</span> </label>
+                                                            <input type="text" class="form-control" name="ItemName" id="ItemName" placeholder="상품명" value="{{ .info.ItemName }}" required>
+                                                            <div class="invalid-feedback">상품명(내부관리)을 입력해주세요</div>
+                                                        </div>
+                                                        <div class="col-md-12 mb-3">
+                                                            <label class="form-label" for="DpName">상품 노출명(고객)</label>
+                                                            <input type="text" class="form-control" name="DpName" id="DpName" placeholder="상품 노출명" value="{{ .info.DpName }}">
+                                                            <div class="invalid-feedback">상품 노출명을 입력해주세요</div>
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                            <label class="form-label" for="UnitAmt">규격량 <span class="text-danger">*</span> </label>
+                                                            <input type="number" class="form-control" name="UnitAmt" id="UnitAmt" placeholder="규격량" value="{{ .info.UnitAmt }}" required>
+                                                            <div class="invalid-feedback">규격량을 입력해주세요</div>
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                            <label class="form-label" for="UnitType">규격타입 <span class="text-danger">*</span> </label>
+                                                            <select class="custom-select" name="UnitType" id="UnitType" required>
+                                                                <option value="">선택</option>
+                                                                {{ range .unitlist }}
+                                                                    <option value="{{.CodeKey}}" {{ if eq $.info.UnitType .CodeKey }} selected {{end}}>{{.CodeLabel}}</option>
+                                                                {{ end }}
+                                                            </select>
+                                                            <div class="invalid-feedback">카테고리를 선택해주세요</div>
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                            <label class="form-label" for="UnitPrice">규격단가</label>
+                                                            <div class="input-group">
+                                                                <input type="number" class="form-control" name="UnitPrice" id="UnitPrice" placeholder="규격단가" value="{{ .info.UnitPrice }}">
+                                                                <div class="input-group-append">
+                                                                    <span class="input-group-text">원</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="invalid-feedback">규격단가을 입력해주세요</div>
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <label class="form-label mb-3">상태<span class="text-danger">*</span></label>
+                                                            <div class="custom-control custom-radio mb-1">
+                                                                <input type="radio" class="custom-control-input" id="StatusReady" name="StatusCode" value="ready" {{if ne .info.StatusCode "normal" }} checked {{end}} required>
+                                                                <label class="custom-control-label" for="StatusReady">대기</label>
+                                                            </div>
+                                                            <div class="custom-control custom-radio mb-1">
+                                                                <input type="radio" class="custom-control-input" id="StatusNormal" name="StatusCode" value="normal" {{if eq .info.StatusCode "normal" }} checked {{end}} required>
+                                                                <label class="custom-control-label" for="StatusNormal">활성</label>
+                                                                <div class="invalid-feedback">상태를 선택해주세요</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="panel-content border-faded border-left-0 border-right-0 border-bottom-0 d-flex flex-row align-items-center">
+                                                    <button class="btn btn-primary ml-auto" type="submit" id="form-submit-btn">저장</button>
+                                                    <button class="btn btn-default ml-2" type="button" onclick="javascript:history.back();">취소</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    <!-- this overlay is activated only when mobile menu is triggered -->
+                    <div class="page-content-overlay" data-action="toggle" data-class="mobile-nav-on"></div>
+                    <!-- END Page Content -->
+
+                    {{ template "page-footer.tmpl" . }}
+                </div>
+            </div>
+        </div>
+
+        {{ template "body-footer.tmpl" . }}
+
+        {{ template "body-footer-script.tmpl" . }}
+
+        <script>
+            (function()
+            {
+                'use strict';
+            })();
+
+            $(document).ready(function() {
+
+                "use strict";
+
+                $("#form-submit-btn").click(function(event)
+                {
+                    event.preventDefault();
+
+                    //form 유효성 검사
+                    var form = $("#form-basic")
+
+                    if (form[0].checkValidity() === false)
+                    {
+                        event.stopPropagation();
+
+                        form.addClass('was-validated');
+                        return;
+                    }
+
+                    //form submit ajax
+                    var formData = form.serialize();
+
+                    $.ajax({
+                        cache : false,
+                        url : "/api/item/set",
+                        type : 'POST',
+                        data : formData,
+                        success : function(data) {
+                            console.log(data);
+                            Swal.fire("Success", "등록/수정 완료!", "success").then(function(result) {
+                                if (result.value) {
+                                    location.href="/item/list";
+                                }
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            if (xhr.status == 401) {
+                                Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                    location.href = location.href;
+                                });
+                            }
+                            else {
+                                Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                            }
+                        }
+                    });
+                });
+            });
+        </script>
+
+    </body>
+    <!-- END Body -->
+</html>
+{{ end }}

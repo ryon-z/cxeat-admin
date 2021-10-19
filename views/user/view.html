@@ -1,0 +1,495 @@
+{{ define "user/view.html" }}
+
+<!DOCTYPE html>
+<html lang="ko" class="root-text-sm">
+    <head>
+        {{ template "html-head.tmpl" . }}
+
+        <link rel="stylesheet" media="screen, print" href="/contents/css/datagrid/datatables/datatables.bundle.css">
+    </head>
+
+    <!-- BEGIN Body -->
+    <body class="mod-bg-1 mod-nav-link mod-skin-light">
+
+        {{ template "body-header-script.tmpl" . }}
+
+        <!-- BEGIN Page Wrapper -->
+        <div class="page-wrapper">
+            <div class="page-inner">
+                {{ template "body-left-aside.tmpl" . }}
+
+                <div class="page-content-wrapper">
+
+                    {{ template "page-header.tmpl" . }}
+
+                    <!-- BEGIN Page Content -->
+                    <!-- the #js-page-content id is needed for some plugins to initialize -->
+                    <main id="js-page-content" role="userlist" class="page-content">
+                        <div class="subheader">
+                            <h1 class="subheader-title">
+                                <i class='subheader-icon fal fa-ballot-check'></i> <span class='fw-500'>{{.title}}</span>
+                            </h1>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6 col-xl-3 order-lg-1 order-xl-1">
+                                <div class="card mb-g">
+                                    <div class="card-body border-faded border-top-0 border-left-0 border-right-0 rounded-top">
+                                        <div class="d-flex flex-row align-items-center">
+                                            <span class="mr-3">
+                                                <span class="rounded-circle profile-image d-block" style="background-image:url('/contents/img/demo/avatars/avatar-m.png'); background-size: cover;"></span>
+                                            </span>
+                                            <div class="info-card-text flex-1">
+                                                <span href="javascript:void(0);" class="fs-xl font-weight-bold text-info">
+                                                    {{.info.UserName}} <span class="badge badge-pill badge-success fs-sm">이용중
+                                                </span>
+                                                </span>
+                                                <div class="text-truncate text-truncate-xl fs-sm mt-1">
+                                                    <span class="badge badge-pill badge-warning mr-1">{{.info.UserType}}</span>{{.info.UserID}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0 collapse show">
+                                        <div class="p-3">
+                                            <a href="tel:{{ .info.UserPhone }}" class="mt-1 d-block fs-md fw-400 text-dark">
+                                                <i class="fas fa-mobile-alt text-muted ml-1 mr-1"></i> {{ .info.UserPhone }}
+                                            </a>
+                                            <a href="mailto:{{ .info.UserEmail }}" class="mt-1 d-block fs-md fw-400 text-dark">
+                                                <i class="fas fa-at text-muted mr-1"></i> {{ .info.UserEmail }}
+                                            </a>
+                                            <span class="mt-1 d-block fs-md fw-400 text-dark">
+                                                <i class="fas fa-transgender text-muted mr-1"></i> 성별 {{ .info.UserGender | default " - "}}
+                                            </span>
+                                            <span class="mt-1 d-block fs-md fw-400 text-dark">
+                                                <i class="fas fa-birthday-cake text-muted mr-1"></i> 생일 {{ if .info.BirthDay | empty }} - {{ else }} {{ .info.BirthDay | date "2006-01-02" }} {{end}}
+                                            </span>
+                                            <span class="mt-1 d-block fs-md fw-400 text-dark">
+                                                <i class="fas fa-sign-in-alt text-muted mr-1"></i> 가입일시 {{ .info.RegDate | date "2006-01-02 15:04" }}
+                                            </span>
+                                            <span class="mt-1 d-block fs-md fw-400 text-dark">
+                                                <i class="fas fa-ad text-muted mr-1"></i> 마케팅 수신 {{if .info.IsMktAgree }}동의{{ else }} 거부 {{ end }}
+                                            </span>
+                                            <span class="mt-1 d-block fs-md fw-400 text-dark">
+                                                <i class="fas fa-link text-muted mr-1"></i> 유입 {{ .info.Funnel | default " - " }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- 주소관리 -->
+                                <div class="card mb-g">
+                                    <div class="card-body">
+                                        <div class="py-2">
+                                            <h2 class="mb-0 fs-xl">
+                                                <i class="fal fa-location-circle"></i> 주소록
+                                            </h2>
+                                        </div>
+                                        <div id="js_address_list">
+                                            <div class="input-group mb-g">
+                                                <input type="text" class="form-control form-control-md shadow-inset-2" id="js_address_list_filter" placeholder="검색">
+                                                <div class="input-group-append">
+                                                    <div class="input-group-text">
+                                                        <i class="fal fa-search"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <ul class="list-group">
+                                                {{ range .addresslist }}
+                                                <li class="list-group-item">
+                                                    <div class="position-absolute pos-right pos-top m-2">
+                                                        {{/* <button class="btn btn-xs btn-danger">
+                                                            <span class="fal fa-trash-alt"></span> 삭제
+                                                        </button> */}}
+                                                    </div>
+                                                    <div class="fw-500" data-filter-tags="{{ .RcvName }}">[{{ .RcvName }}] {{.ContactNo}}</div>
+                                                    <div data-filter-tags='{{ .RoadAddress | default ""}}'>{{ .RoadAddress | default "*도로명주소없음" }}</div>
+                                                    <div data-filter-tags='{{ .LotAddress | default ""}}'>{{ .LotAddress | default "*지번주소없음" }}</div>
+                                                    <div data-filter-tags="{{ .SubAddress }}">{{ .SubAddress }}</div>
+                                                </li>
+                                                {{ end }}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- 카드관리 -->
+                                <div class="card mb-g">
+                                    <div class="card-body">
+                                        <div class="py-2">
+                                            <h2 class="mb-0 fs-xl">
+                                                <i class="fal fa-credit-card"></i> 카드
+                                            </h2>
+                                        </div>
+                                        <div id="js_card_list">
+                                            <div class="input-group mb-g">
+                                                <input type="text" class="form-control form-control-md shadow-inset-2" id="js_card_list_filter" placeholder="검색">
+                                                <div class="input-group-append">
+                                                    <div class="input-group-text">
+                                                        <i class="fal fa-search"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <ul class="list-group">
+                                                {{ range .cardlist }}
+                                                <li class="list-group-item">
+                                                    <div class="position-absolute pos-right pos-top m-2">
+                                                        {{/* <button class="btn btn-xs btn-danger">
+                                                            <span class="fal fa-trash-alt"></span> 삭제
+                                                        </button> */}}
+                                                    </div>
+                                                    <div class="fw-500" data-filter-tags="{{.CardNickName}}">{{.CardNickName}} {{if eq .StatusCode "cancel"}}(*삭제된 카드){{end}}</div>
+                                                    <div data-filter-tags="{{.CardName}} {{.CardNumber}}">{{.CardName}} {{.CardNumber}}</div>
+                                                </li>
+                                                {{ end }}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-xl-3 order-lg-2 order-xl-3">
+                                <!-- 기록관리 -->
+                                {{/* <div class="card mb-g">
+                                    <div class="card-body">
+                                        <div class="py-2">
+                                            <h2 class="mb-0 fs-xl">
+                                                <i class="fal fa-clipboard-list"></i> 기록관리
+                                            </h2>
+                                        </div>
+                                        <div id="js_hist_list" class="pb-3">
+                                            <div class="input-group mb-g">
+                                                <input type="text" class="form-control form-control-md shadow-inset-2" id="js_hist_list_filter" placeholder="검색">
+                                                <div class="input-group-append">
+                                                    <div class="input-group-text">
+                                                        <i class="fal fa-search"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <ul class="list-group">
+                                                <li class="list-group-item " >
+                                                    <div class="fw-500" data-filter-tags="기록1">기록타입1</div>
+                                                    <div data-filter-tags="1111-****-****-2222">1111-****-****-2222</div>
+                                                    <div data-filter-tags="국민카드">국민카드</div>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <div class="fw-500" data-filter-tags="별칭1">기록타입2</div>
+                                                    <div data-filter-tags="1111-****-****-2222">3333-****-****-2222</div>
+                                                    <div data-filter-tags="삼성카드">삼성카드</div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="card border mb-g">
+                                            <div class="card-body">
+                                                <div class="d-flex flex-column">
+                                                    <div class="border-0 flex-1 position-relative shadow-top">
+                                                        <div class="pt-2 pb-1 pr-0 pl-0 rounded-0 position-relative" tabindex="-1">
+                                                            <div class="">
+                                                                <textarea class="form-control border-0 p-0 bg-transparent" rows="3" placeholder="회원 기록 입력 ..."></textarea>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="height-6 d-flex flex-row align-items-center flex-wrap flex-shrink-0">
+                                                        <button class="btn btn-info shadow-0 ml-auto">
+                                                            <i class="fal fa-pen-square"></i> 입력
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> */}}
+                            </div>
+                            <div class="col-lg-12 col-xl-6 order-lg-3 order-xl-2">
+                                <!-- 구독 내역 -->
+                                <div class="card mb-g">
+                                    <div class="p-3">
+                                        <h2 class="mb-0 fs-xl">
+                                            <i class="fal fa-tags"></i> 구독내역
+                                        </h2>
+                                    </div>
+                                    <div class="card-body pb-0 px-4">
+                                        <!-- datatable start -->
+                                        <table id="dt-subs" class="table table-bordered table-hover table-striped w-100 text-nowrap">
+                                            <thead class="thead-dark">
+                                            </thead>
+                                        </table>
+                                        <!-- datatable end -->
+                                    </div>
+                                </div>
+                                <!-- 주문 내역 -->
+                                <div class="card mb-g">
+                                    <div class="p-3">
+                                        <h2 class="mb-0 fs-xl">
+                                            <i class="fal fa-tags"></i> 주문내역
+                                        </h2>
+                                    </div>
+                                    <div class="card-body px-4">
+                                        <!-- datatable start -->
+                                        <table id="dt-order" class="table table-bordered table-hover table-striped w-100 text-nowrap">
+                                            <thead class="thead-dark">
+                                            </thead>
+                                        </table>
+                                        <!-- datatable end -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    <!-- this overlay is activated only when mobile menu is triggered -->
+                    <div class="page-content-overlay" data-action="toggle" data-class="mobile-nav-on"></div>
+                    <!-- END Page Content -->
+
+                    {{ template "page-footer.tmpl" . }}
+                </div>
+            </div>
+        </div>
+
+        {{ template "body-footer.tmpl" . }}
+
+        {{ template "body-footer-script.tmpl" . }}
+
+        <script src="/contents/js/datagrid/datatables/datatables.bundle.js"></script>
+        <script>
+            $(document).ready(function()
+            {
+                initApp.listFilter($('#js_address_list'), $('#js_address_list_filter'));
+                initApp.listFilter($('#js_card_list'), $('#js_card_list_filter'));
+
+                $('#dt-order').dataTable(
+                {
+                    pageLength: 5,
+                    oLanguage: {
+                        sEmptyTable: "데이터가 없습니다.",
+                        sInfo: "_START_ 부터 _END_ 까지, 총 _TOTAL_ 개",
+                        sInfoEmpty: "검색 결과 없음",
+                        sInfoFiltered: "(전체 _MAX_ 개 중)",
+                        sThousands: ",",
+                        sLengthMenu: "_MENU_ 개씩 보기",
+                        sLoadingRecords: "Loading...",
+                        sProcessing: "Processing...",
+                        sSearchPlaceholder: "검색",
+                        sZeroRecords: "검색된 내용이 없습니다."
+                    },
+                    dom:"<'row'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>" +
+                        "<'row mb-3'<'col-sm-12'tr>>",
+                    ajax: {
+                        url: "/api/order/list",
+                        data: {
+                            status: "",
+                            userno: {{ .info.UserNo }},
+                        },
+                        error: function(xhr, status, error) {
+                            if (xhr.status == 401) {
+                                Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                    location.href = location.href;
+                                });
+                            }
+                            else {
+                                Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                            }
+                        }
+                    },
+                    columns: [
+                        {
+                            title: "#",
+                            className: "notexport",
+                            data: "OrderNo",
+                            render: function(data, type, row, meta){
+                                return `<a class="btn btn-sm btn-primary btn-pills" href="/order/view/${row.OrderNo}">상세</a>`;
+                            },
+                            orderable: false,
+                        },
+                        {
+                            title: "No.",
+                            data: "OrderNo",
+                        },
+                        {
+                            title: "유형",
+                            render: function(data, type, row, meta){
+                                return `${row.OrderTypeDesc}<br>${(row.OrderRound)?"(" + row.OrderRound + "회차)":""}`;
+                            },
+                        },
+                        {
+                            title: "구성",
+                            render: function(data, type, row, meta){
+                                return `${row.BoxTypeDesc}<br>(${row.CateTypeDesc})`;
+                            },
+                        },
+                        {
+                            title: "금액",
+                            render: function(data, type, row, meta){
+                                return `${row.OrderPrice.toLocaleString()}${(row.DiscountPrice > 0 ? '<br><span class="badge badge-danger badge-pill">할인</span> -' + row.DiscountPrice.toLocaleString() + "<br> = " + (row.OrderPrice - row.DiscountPrice).toLocaleString() : "")}`;
+                            },
+                        },
+                        {
+                            title: "상품",
+                            data: "ItemsString",
+                            render: function(data, type) {
+                                if(data) {
+                                    return `<span class="badge border border-info text-dark">${data.split('|').join('</span><br><span class="badge border border-info text-dark">')}</span>`;
+                                }
+                                else {
+                                    return "<code>구성된 상품이 없습니다</code>";
+                                }
+                            },
+                        },
+                        {
+                            title: "상태",
+                            data: "StatusDesc"
+                        },
+                        {
+                            title: "배송예정일",
+                            data: "ReqDelivDate",
+                            render: function(data, type, row) {
+                                return `${moment(data).format("YYYY-MM-DD")}<br>(${moment(row.RegDate).format("YYYY-MM-DD")})`
+                            },
+                        },
+                        {
+                            title: "배송지",
+                            render: function(data, type, row, meta){
+                                return `[ ${row.RcvName} ] ${row.ContactNo}<br>${row.MainAddress}<br>${row.SubAddress}`;
+                            },
+                        },
+                    ],
+                    scrollX: true,
+                    scrollCollapse: true,
+                    fixedColumns:
+                    {
+                        leftColumns: 1,
+                    },
+                });
+
+                $('#dt-subs').dataTable(
+                {
+                    pageLength: 5,
+                    oLanguage: {
+                        sEmptyTable: "데이터가 없습니다.",
+                        sInfo: "_START_ 부터 _END_ 까지, 총 _TOTAL_ 개",
+                        sInfoEmpty: "검색 결과 없음",
+                        sInfoFiltered: "(전체 _MAX_ 개 중)",
+                        sThousands: ",",
+                        sLengthMenu: "_MENU_ 개씩 보기",
+                        sLoadingRecords: "Loading...",
+                        sProcessing: "Processing...",
+                        sSearchPlaceholder: "검색",
+                        sZeroRecords: "검색된 내용이 없습니다."
+                    },
+                    dom:"<'row'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>" +
+                        "<'row mb-3'<'col-sm-12'tr>>",
+                    ajax: {
+                        url: "/api/subs/list",
+                        data: {
+                            userno: {{ .info.UserNo }},
+                        },
+                        error: function(xhr, status, error) {
+                            if (xhr.status == 401) {
+                                Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                    location.href = location.href;
+                                });
+                            }
+                            else {
+                                Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                            }
+                        }
+                    },
+                    columns: [
+                        {
+                            title: "#",
+                            className: "notexport",
+                            data: "SubsNo",
+                            render: function(data, type, row, meta){
+                                return `<a class="btn btn-sm btn-primary btn-pills" href="/subs/view/${row.SubsNo}">상세</a>`;
+                            },
+                            orderable: false,
+                        },
+                        {
+                            title: "No.",
+                            data: "SubsNo",
+                        },
+                        {
+                            title: "상태",
+                            render: function(data, type, row, meta) {
+                                var str = ""
+                                if (row.StatusCode == "cancel") {
+                                    str = `<span class="badge badge-pill badge-dark fs-md">${row.StatusDesc}</span>`;
+                                }
+                                else {
+                                    str = `<span class="badge badge-pill badge-success fs-md">${row.StatusDesc}</span>`;
+                                }
+
+                                return str;
+                            }
+                        },
+                        {
+                            title: "배송지",
+                            render: function(data, type, row, meta){
+                                return `[ ${row.RcvName} ] ${row.ContactNo}<br>${row.MainAddress}<br>${row.SubAddress}`;
+                            },
+                        },
+                        {
+                            title: "구성",
+                            render: function(data, type, row, meta){
+                                return `${row.BoxTypeDesc}<br>(${row.CateTypeDesc})`;
+                            },
+                        },
+                        {
+                            title: "금액",
+                            data: "SubsPrice",
+                            render: function(data, type, row, meta){
+                                return data.toLocaleString();
+                            },
+                        },
+                        {
+                            title: "주기(일)",
+                            data: "PeriodDay"
+                        },
+                        {
+                            title: "회차",
+                            render: function(data, type, row, meta){
+                                var str = '';
+
+                                str = `${row.SubsSeq}번째 구독 <br>${row.MaxOrderRound}회차`;
+
+                                return str;
+                            },
+                        },
+                        {
+                            title: "배송일",
+                            render: function(data, type, row) {
+                                var str = '';
+
+                                if (row.StatusCode == "normal") {
+                                    if (row.MaxReqDelivDate) {
+                                        str += `${moment(row.MaxReqDelivDate).format("YYYY-MM-DD")}<br>`;
+                                    }
+
+                                    str += ` ${moment(row.NextDate).format("YYYY-MM-DD")} (예정)`;
+                                    return str;
+                                }
+                                else {
+                                    return `-`;
+                                }
+                            },
+                        },
+                        {
+                            title: "신청일",
+                            data: "RegDate",
+                            render: function(data, type, row) {
+                                return `${moment(data).format("YYYY-MM-DD")}`;
+                            },
+                        },
+                    ],
+                    scrollX: true,
+                    scrollCollapse: true,
+                    fixedColumns:
+                    {
+                        leftColumns: 1,
+                    },
+                });
+            });
+
+        </script>
+
+    </body>
+    <!-- END Body -->
+</html>
+{{ end }}

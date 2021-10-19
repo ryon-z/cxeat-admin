@@ -1,0 +1,310 @@
+{{ define "order/invoicelist.html" }}
+
+<!DOCTYPE html>
+<html lang="ko" class="root-text-sm">
+    <head>
+        {{ template "html-head.tmpl" . }}
+
+        <link rel="stylesheet" media="screen, print" href="/contents/css/datagrid/datatables/datatables.bundle.css">
+    </head>
+
+    <!-- BEGIN Body -->
+    <body class="mod-bg-1 mod-nav-link mod-skin-light">
+
+        {{ template "body-header-script.tmpl" . }}
+
+        <!-- BEGIN Page Wrapper -->
+        <div class="page-wrapper">
+            <div class="page-inner">
+                {{ template "body-left-aside.tmpl" . }}
+
+                <div class="page-content-wrapper">
+
+                    {{ template "page-header.tmpl" . }}
+
+                    <!-- BEGIN Page Content -->
+                    <!-- the #js-page-content id is needed for some plugins to initialize -->
+                    <main id="js-page-content" role="userlist" class="page-content">
+                        <div class="subheader">
+                            <h1 class="subheader-title">
+                                <i class='subheader-icon far fa-th-list'></i> <span class='fw-500'>{{.title}}</span>
+                            </h1>
+                        </div>
+                        <div class="row">
+                            <div class="col-xl-12">
+                                <div id="panel-1" class="panel">
+                                    <div class="panel-hdr">
+                                        <h2>
+                                            <span class="fw-300"><i></i></span>
+                                        </h2>
+                                    </div>
+                                    <div class="panel-container show">
+                                        <div class="panel-content">
+                                            <div class="panel-tag">
+                                                <code>배송준비중</code> 이거나 <code>배송중</code>인 주문을 확인할 수 있습니다.<br>
+                                                <code>[송장 파일 등록]</code>버튼을 통해 주문의 송장번호 등록이 가능합니다.<br>
+                                                <a href="/contents/file/invoice_sample.xlsx" target="_blank">송장파일 샘플 다운로드</a><br><br>
+                                                송장번호 등록시, 주문 상태가 <code>배송중</code>상태로 변경되며,<br>
+                                                <code>배송시작</code>알림이 발송됩니다.
+                                            </div>
+                                            <!-- datatable start -->
+                                            <table id="dt-first" class="table table-bordered table-hover table-striped w-100 text-nowrap">
+                                                <thead class="thead-dark">
+                                                </thead>
+                                            </table>
+                                            <!-- datatable end -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    <!-- this overlay is activated only when mobile menu is triggered -->
+                    <div class="page-content-overlay" data-action="toggle" data-class="mobile-nav-on"></div>
+                    <!-- END Page Content -->
+
+                    {{ template "page-footer.tmpl" . }}
+                </div>
+            </div>
+        </div>
+
+        {{ template "body-footer.tmpl" . }}
+
+        {{ template "body-footer-script.tmpl" . }}
+
+        <script src="/contents/js/datagrid/datatables/datatables.bundle.js"></script>
+        <script src="/contents/js/datagrid/datatables/datatables.export.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+        <script>
+            $(document).ready(function()
+            {
+                var rslt = "<a><>";
+                var lnk = "// //";
+                lnk = "asd//www.hanjin.co.kr/kor/CMS/DeliveryMgr/WaybillResult.do?mCode=MN038&schLang=KR&wblnum=";
+                lnk = "//www.hanjin.co.kr/kor/CMS/DeliveryMgr/WaybillResult.do?mCode=MN038&schLang=KR&wblnum=";
+
+                // initialize datatable
+                $('#dt-first').dataTable(
+                {
+                    pageLength: 25,
+                    oLanguage: {
+                        sEmptyTable: "데이터가 없습니다.",
+                        sInfo: "_START_ 부터 _END_ 까지, 총 _TOTAL_ 개",
+                        sInfoEmpty: "검색 결과 없음",
+                        sInfoFiltered: "(전체 _MAX_ 개 중)",
+                        sThousands: ",",
+                        sLengthMenu: "_MENU_ 개씩 보기",
+                        sLoadingRecords: "Loading...",
+                        sProcessing: "Processing...",
+                        sSearchPlaceholder: "검색",
+                        sZeroRecords: "검색된 내용이 없습니다."
+                    },
+                    dom:"<'row mb-3'<'col-sm-12 col-md-12 d-flex align-items-center justify-content-end'B>>" +
+                        "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'l>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>" +
+                        "<'row mb-3'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                    ajax: {
+                        url: "/api/order/list",
+                        data: {
+                            status: "ready-delivery|in-delivery",
+                        },
+                        error: function(xhr, status, error) {
+                            if (xhr.status == 401) {
+                                Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                    location.href = location.href;
+                                });
+                            }
+                            else {
+                                Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                            }
+                        }
+                    },
+                    columns: [
+                        {
+                            title: "#",
+                            className: "notexport",
+                            data: "OrderNo",
+                            render: function(data, type, row, meta){
+                                return `<a class="btn btn-sm btn-primary btn-pills" href="/order/view/${row.OrderNo}">상세</a>`;
+                            },
+                            orderable: false,
+                        },
+                        {
+                            title: "회원",
+                            render: function(data, type, row, meta){
+                                return `<a class="" href="/user/view/${row.UserNo}">${row.UserName}</a>`;
+                            },
+                        },
+                        {
+                            title: "배송지",
+                            render: function(data, type, row, meta){
+                                return `[ ${row.RcvName} ] ${row.ContactNo}<br>${row.MainAddress}<br>${row.SubAddress}`;
+                            },
+                        },
+                        {
+                            title: "유형",
+                            render: function(data, type, row, meta){
+                                return `${row.OrderTypeDesc}<br>${(row.OrderRound)?"(" + row.OrderRound + "회차)":""}`;
+                            },
+                        },
+                        {
+                            title: "구성",
+                            render: function(data, type, row, meta){
+                                return `${row.BoxTypeDesc}<br>(${row.CateTypeDesc})`;
+                            },
+                        },
+                        {
+                            title: "금액",
+                            render: function(data, type, row, meta){
+                                return `${row.OrderPrice.toLocaleString()}${(row.DiscountPrice > 0 ? '<br><span class="badge badge-danger badge-pill">할인</span> -' + row.DiscountPrice.toLocaleString() + "<br> = " + (row.OrderPrice - row.DiscountPrice).toLocaleString() : "")}`;
+                            },
+                        },
+                        {
+                            title: "상품",
+                            data: "ItemsString",
+                            render: function(data, type) {
+                                if(data) {
+                                    return `<span class="badge border border-info text-dark">${data.split('|').join('</span><br><span class="badge border border-info text-dark">')}</span>`;
+                                }
+                                else {
+                                    return "<code>구성된 상품이 없습니다</code>";
+                                }
+                            },
+                        },
+                        {
+                            title: "상태",
+                            render: function(data, type, row, meta) {
+                                var str = "";
+
+                                if (row.StatusCode == "init") {
+                                    str = `<span class="badge badge-pill badge-info fs-md">${row.StatusDesc}</span>`;
+                                }
+                                else if (row.StatusCode == "done") {
+                                    str = `<span class="badge badge-pill badge-success fs-md">${row.StatusDesc}</span>`;
+                                }
+                                else if (row.StatusCode.includes("payment")) {
+                                    str = `<span class="badge badge-pill badge-danger fs-md">${row.StatusDesc}</span>`;
+                                }
+                                else if (row.StatusCode.includes("delivery")) {
+                                    str = `<span class="badge badge-pill badge-warning fs-md">${row.StatusDesc}</span>`;
+                                }
+                                else {
+                                    str = `<span class="badge badge-pill badge-dark fs-md">${row.StatusDesc}</span>`;
+                                }
+
+                                return str;
+                            }
+                        },
+                        {
+                            title: "배송정보",
+                            render: function(data, type, row) {
+                                if (row.DelivInvoiceNo) {
+                                    return `[${row.DelivCo}]<br><a href="${row.DelivUrl}" target="_blank">${row.DelivInvoiceNo}</a>`;
+                                }
+
+                                return "";
+                            },
+                        },
+                        {
+                            title: "배송예정일",
+                            data: "ReqDelivDate",
+                            render: function(data, type) {
+                                return moment(data).format("YYYY-MM-DD");
+                            },
+                        },
+                    ],
+                    buttons: [
+                        {
+                            text: '송장 파일 등록',
+                            className: 'btn-outline-danger btn-sm mr-1',
+                            action: function(e, dt, node, cofig) {
+                                Swal.fire({
+                                    title: "송장번호 파일 등록",
+                                    html: `송장번호 파일을 등록 하시겠습니까?<br>이미 송장번호가 등록되어 있더라도<br><code>엑셀파일</code>의 송장번호로 변경됩니다.<br><br>
+                                    <input type="file" id="invoiceFile">`,
+                                    icon: "warning",
+                                    showCancelButton: true,
+                                    confirmButtonText: "네, 등록",
+                                    cancelButtonText: "아니요",
+                                }).then(function(result){
+                                    if (result.value){
+                                        var files = $('#invoiceFile')[0].files;
+
+                                        if (files.length < 1) {
+                                            Swal.fire("Nope!", "파일을 선택해주세요.", "warning");
+                                            return false;
+                                        }
+
+                                        var f = files[0];
+                                        var reader = new FileReader();
+
+                                        reader.onload = function(e) {
+                                            var fileData = reader.result;
+                                            var wb = XLSX.read(fileData, {type : 'binary'});
+                                            var sheetNameList = wb.SheetNames;
+                                            var firstSheetName = sheetNameList[0];
+                                            var firstSheet = wb.Sheets[firstSheetName];
+                                            var json = XLSX.utils.sheet_to_json(firstSheet, {raw: false, range: 1, header:["OrderNo","DelivCo","InvoiceNo"]});
+
+                                            $.ajax({
+                                                cache : false,
+                                                url : "/api/order/invoice/bulk",
+                                                type : 'POST',
+                                                contentType: "application/json",
+                                                data: JSON.stringify(json),
+                                                success : function(data) {
+                                                    if (data.ok_cnt < 1) {
+                                                        Swal.fire("실패", `총 ${data.fail_cnt} 건, 적용하지 못했습니다.<br>업로드 파일을 확인해주세요.`, "warning");
+                                                    }
+                                                    else {
+                                                        Swal.fire("성공",  `${data.ok_cnt} 건 완료, ${data.fail_cnt} 건 실패`, "success").then(function(result) {
+                                                            if (result.value) {
+                                                                location.href=location.href;
+                                                            }
+                                                        });
+                                                    }
+                                                },
+                                                error: function(xhr, status, error) {
+                                                    if (xhr.status == 401) {
+                                                        Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                                            location.href = location.href;
+                                                        });
+                                                    }
+                                                    else {
+                                                        Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                                                    }
+                                                }
+                                            });
+                                        };
+
+                                        reader.readAsBinaryString(f);
+                                    }
+                                });
+                            },
+                        },
+                        {
+                            extend: 'excelHtml5',
+                            text: 'Excel',
+                            titleAttr: 'Generate Excel',
+                            className: 'btn-outline-success btn-sm mr-1',
+                            exportOptions: {
+                                columns: ':not(.notexport)',
+                            }
+                        },
+                    ],
+                    scrollX: true,
+                    scrollCollapse: true,
+                    fixedColumns:
+                    {
+                        leftColumns: 1,
+                    },
+                    stateSave: true,
+                });
+            });
+        </script>
+
+    </body>
+    <!-- END Body -->
+</html>
+{{ end }}

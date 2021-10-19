@@ -1,0 +1,549 @@
+{{ define "order/view.html" }}
+
+<!DOCTYPE html>
+<html lang="ko" class="root-text-sm">
+    <head>
+        {{ template "html-head.tmpl" . }}
+
+        <link rel="stylesheet" media="screen, print" href="/contents/css/formplugins/select2/select2.bundle.css">
+    </head>
+
+    <!-- BEGIN Body -->
+    <body class="mod-bg-1 mod-nav-link mod-skin-light">
+
+        {{ template "body-header-script.tmpl" . }}
+
+        <!-- BEGIN Page Wrapper -->
+        <div class="page-wrapper">
+            <div class="page-inner">
+                {{ template "body-left-aside.tmpl" . }}
+
+                <div class="page-content-wrapper">
+
+                    {{ template "page-header.tmpl" . }}
+
+                    <!-- BEGIN Page Content -->
+                    <!-- the #js-page-content id is needed for some plugins to initialize -->
+                    <main id="js-page-content" role="userlist" class="page-content">
+                        <div class="subheader">
+                            <h1 class="subheader-title">
+                                <i class='subheader-icon far fa-ballot-check'></i> <span class='fw-500'>{{.title}}</span>
+                            </h1>
+                        </div>
+                        <div class="row">
+                            <div class="col-xl-6">
+                                <div id="panel-1" class="panel">
+                                    <div class="panel-hdr">
+                                        <h2></h2>
+                                        <div class="panel-toolbar">
+                                        </div>
+                                    </div>
+                                    <div class="panel-container show">
+                                        <div class="panel-content">
+                                            <div class="panel-tag">
+                                                주문 정보 <code>확인</code> 및 <code>변경</code>할 수 있습니다.<br>
+                                                <div class="my-1">
+                                                    <button class="btn btn-sm btn-primary" type="button" data-toggle="collapse" data-target="#StatusChangeTable" aria-expanded="false" aria-controls="StatusChangeTable">
+                                                        주문상태에 따른 변경 가능 범위 확인
+                                                    </button>
+                                                </div>
+                                                <div class="collapse" id="StatusChangeTable">
+                                                    <table class="table table-bordered text-center fs-xs">
+                                                        <thead>
+                                                            <td></td><td>구성변경</td><td>박스변경<br>(가격변경)</td><td>주소변경</td><td>카드변경</td><td>취소</td>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>상품준비중</td><td>O</td><td>O</td><td>O</td><td>O</td><td>O</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>결제대기</td><td>O</td><td>O</td><td>O</td><td>O</td><td>O</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>배송준비중</td><td>O</td><td>X</td><td>O</td><td>X</td><td>O (+승인취소)</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>배송중</td><td>X</td><td>X</td><td>X</td><td>X</td><td>X</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                주문에 대한 <code>변경</code>과 <code>취소</code>는 구독에는 영향을 주지 않습니다.<br>
+                                                <code>주문취소</code>를 하더라도 구독중이라면 다음 배송주기에 맞추어 진행됩니다.<br>
+                                                <code>결제승인</code>된 주문을 취소할 경우 <code>결제승인취소</code>와 함께 진행됩니다.<br>
+                                                변경한 내용에 대한 <code>상품구성</code> 및 <code>발주</code>, <code>배송</code>에 관련한 모든 내용을 확인해주세요.<br>
+                                            </div>
+                                            <form class="needs-validation" id="form-basic" novalidate>
+                                                <input type="hidden" name="OrderNo" id="OrderNo" value="{{ .info.OrderNo }}" />
+                                                <div class="panel-content">
+                                                    <div class="form-row">
+                                                        <div class="col-md-12 mb-3">
+                                                            <label class="form-label">상태</label>
+                                                            <h3>
+                                                                {{ if eq .info.StatusCode "cancel" }}
+                                                                    <span class="badge badge-dark">{{.info.StatusDesc}}</span>
+                                                                {{ else }}
+                                                                    <span class="badge badge-info">{{.info.StatusDesc}}</span>
+                                                                {{ end }}
+                                                            </h3>
+                                                        </div>
+                                                        <div class="col-md-12 mb-3">
+                                                            <div><label class="form-label" for="CateTypes">구성 <span class="text-danger">*</span></label></div>
+                                                            <select class="select2 form-control" multiple="multiple" name="CateTypes[]" id="CateTypes" required>
+                                                                {{ range .type }}
+                                                                    <option value="{{.CodeKey}}" {{ if not .IsUse }} disabled {{ end }} {{if ($.info.CateTypes | containsarr .CodeKey) }} selected {{ end }}>
+                                                                        {{- .CodeLabel -}} {{if not .IsUse }}(비활성){{end -}}
+                                                                    </option>
+                                                                {{ end }}
+                                                            </select>
+                                                            <div class="invalid-feedback">구독 구성을 선택해주세요</div>
+                                                        </div>
+                                                        <div class="col-md-3 mb-3">
+                                                            <label class="form-label" for="BoxType">박스 <span class="text-danger">*</span> </label>
+                                                            <select class="custom-select" name="BoxType" id="BoxType" required>
+                                                                {{ range .box }}
+                                                                    <option value="{{.CodeKey}}" data-price="{{.CodeValue}}" {{ if not .IsUse }} disabled {{ end }} {{if eq $.info.BoxType .CodeKey }} selected {{ end }}>
+                                                                        {{.CodeLabel}}
+                                                                    </option>
+                                                                {{ end }}
+                                                            </select>
+                                                            <div class="invalid-feedback">박스를 선택해주세요</div>
+                                                        </div>
+                                                        <div class="col-md-3 mb-3">
+                                                            <label class="form-label" for="OrderPrice">주문 금액 <span class="text-danger">*</span> </label>
+                                                            <input type="number" class="form-control" name="OrderPrice" id="OrderPrice" placeholder="주문 금액" value="{{ .info.OrderPrice }}" required readonly>
+                                                            <div class="invalid-feedback">주문 금액을 설정하지 못 했습니다.</div>
+                                                        </div>
+                                                        <div class="col-md-3 mb-3">
+                                                            <label class="form-label" for="DiscountPrice">할인 금액 <span class="text-danger">*</span> </label>
+                                                            <input type="number" class="form-control" name="DiscountPrice" id="DiscountPrice" placeholder="할인 금액" value="{{ .info.DiscountPrice }}" required>
+                                                            <div class="invalid-feedback">할인 금액을 입력해주세요</div>
+                                                        </div>
+                                                        <div class="col-md-3 mb-3">
+                                                            <label class="form-label" for="PaymentPrice">결제 금액 <span class="text-danger">*</span> </label>
+                                                            <input type="number" class="form-control" name="PaymentPrice" id="PaymentPrice" placeholder="결제 금액" value="" required readonly>
+                                                            <div class="invalid-feedback">결제 금액을 설정하지 못 했습니다.</div>
+                                                        </div>
+                                                        <div class="col-md-4 mb-3">
+                                                            <label class="form-label" for="NextDate">배송예정일 <span class="text-danger">*</span> </label>
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control" readonly placeholder="선택" id="NextDate" name="NextDate" value='{{.info.ReqDelivDate | date "2006-01-02"}}' required>
+                                                            </div>
+                                                            <div class="invalid-feedback">배송예정일를 선택해주세요</div>
+                                                        </div>
+                                                        <div class="col-md-8 mb-3">
+                                                        </div>
+                                                        <div class="col-md-8 mb-3">
+                                                            <label class="form-label" for="MainAddress">배송지 <span class="text-danger">*</span> </label>
+                                                            <input type="text" class="form-control" readonly id="MainAddress" name="MainAddress" value='{{.info.MainAddress}}' required>
+                                                        </div>
+                                                        <div class="col-md-4 mb-3">
+                                                            <label class="form-label" for="PostNo">우편번호 <span class="text-danger">*</span> </label>
+                                                            <input type="text" class="form-control" readonly id="PostNo" name="PostNo" value='{{.info.PostNo}}' required>
+                                                        </div>
+                                                        <div class="col-md-4 mb-3">
+                                                            <label class="form-label" for="SubAddress">상세 주소<span class="text-danger">*</span> </label>
+                                                            <input type="text" class="form-control" id="SubAddress" name="SubAddress" value='{{.info.SubAddress}}' required>
+                                                        </div>
+                                                        <div class="col-md-4 mb-3">
+                                                            <label class="form-label" for="RcvName">수취인 <span class="text-danger">*</span> </label>
+                                                            <input type="text" class="form-control" id="RcvName" name="RcvName" value='{{.info.RcvName}}' required>
+                                                        </div>
+                                                        <div class="col-md-4 mb-3">
+                                                            <label class="form-label" for="ContactNo">수취인 연락처 <span class="text-danger">*</span> </label>
+                                                            <input type="text" class="form-control" id="ContactNo" name="ContactNo" value='{{.info.ContactNo}}' required>
+                                                        </div>
+                                                        <div class="col-md-12 mb-3">
+                                                            <label class="form-label" for="ReqMsg">배송 요청사항</label>
+                                                            <textarea class="form-control" rows="2" name="ReqMsg" id="ReqMsg">{{ .info.ReqMsg | default "" }}</textarea>
+                                                        </div>
+                                                        <div class="col-md-9 mb-3">
+                                                            <select class="select2" name="AddressNo" id="AddressNo">
+                                                                <option value="">회원 주소록 선택...</option>
+                                                                {{ range .addresslist }}
+                                                                    <option value="{{.AddressNo}}">
+                                                                        [{{.RcvName}}] {{.RoadAddress | default .LotAddress}} {{.SubAddress}} (☎ {{.ContactNo}})
+                                                                    </option>
+                                                                {{ end }}
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-3 mb-3">
+                                                            <button type="button" class="btn btn-primary" id="btn-road-address">불러오기</button>
+                                                        </div>
+                                                        <div class="col-md-12 mb-3">
+                                                            <label class="form-label" for="CardRegNo">결제 카드 <span class="text-danger">*</span> </label>
+                                                            <select class="select2" name="CardRegNo" id="CardRegNo" required>
+                                                                {{ range .cardlist }}
+                                                                    <option value="{{.CardRegNo}}" {{ if ne .StatusCode "normal" }} disabled {{ end }} {{ if eq $.info.CardRegNo .CardRegNo }} selected {{end}}>
+                                                                        [{{.CardNickName}}] {{.CardName}} {{.CardNumber}}
+                                                                    </option>
+                                                                {{ end }}
+                                                            </select>
+                                                            <div class="invalid-feedback">주소를 선택해주세요</div>
+                                                        </div>
+                                                        <div class="col-md-12 mb-3">
+                                                            <label class="form-label" for="AddnlDesc">주문 요청사항</label>
+                                                            <textarea class="form-control" rows="3" name="AddnlDesc" id="AddnlDesc">{{ .info.AddnlDesc | default "" }}</textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="panel-content border-faded border-left-0 border-right-0 border-bottom-0 d-flex flex-row align-items-center">
+                                                    {{ if ne .info.StatusCode "cancel" }}
+                                                    <button class="btn btn-danger ml-2" type="button" id="btn-subs-cancel">주문취소</button>
+                                                    <button class="btn btn-primary ml-auto" type="submit" id="form-submit-btn">저장</button>
+                                                    {{ end }}
+                                                    <button class="btn btn-default ml-auto" type="button" onclick="javascript:history.back();">취소</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-6">
+                                <div id="panel-2" class="panel">
+                                    <div class="panel-hdr">
+                                        <h2><i class="fal fa-tags"></i> 태그 정보</h2>
+                                        <div class="panel-toolbar">
+                                        </div>
+                                    </div>
+                                    <div class="panel-container show">
+                                        <div class="panel-content">
+                                            <div class="m-1" id="tagSection">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="panel-3" class="panel">
+                                    <div class="panel-hdr">
+                                        <h2><i class="fal fa-comment-alt-lines"></i> 리뷰</h2>
+                                        <div class="panel-toolbar">
+                                        </div>
+                                    </div>
+                                    <div class="panel-container show">
+                                        <div class="panel-content">
+                                            <div class="row m-3 pb-3" id="reviewSection"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    <!-- this overlay is activated only when mobile menu is triggered -->
+                    <div class="page-content-overlay" data-action="toggle" data-class="mobile-nav-on"></div>
+                    <!-- END Page Content -->
+
+                    {{ template "page-footer.tmpl" . }}
+                </div>
+            </div>
+        </div>
+
+        {{ template "body-footer.tmpl" . }}
+
+        {{ template "body-footer-script.tmpl" . }}
+
+        <script src="/contents/js/formplugins/jquery.serializeJSON.js"></script>
+        <script src="/contents/js/formplugins/select2/select2.bundle.js"></script>
+        <script>
+            (function()
+            {
+                'use strict';
+
+                $('.select2').select2();
+
+                $('#BoxType').on('change', function(e){
+                    var price = $(this).find('option:selected').data('price');
+
+                    $('#OrderPrice').val(price).trigger('change');
+                });
+
+                $('#OrderPrice,#DiscountPrice').on('change', function(e) {
+                    var pPrice = $('#OrderPrice').val() - $('#DiscountPrice').val();
+
+                    $('#PaymentPrice').val(pPrice);
+                });
+
+                $('#btn-road-address').on('click', function(e){
+                    e.preventDefault();
+
+                    var aNo = $('#AddressNo').val();
+                    if (aNo == "") {
+                        Swal.fire("경고", "주소를 선택해주세요.", "warning");
+                        return false;
+                    }
+
+                    $.ajax({
+                        cache : false,
+                        url : "/api/user/address",
+                        type : 'GET',
+                        data : {
+                            addressno: aNo,
+                        },
+                        success : function(res) {
+                            var addr = res.data.RoadAddress;
+                            if (addr.length < 1) {
+                                addr = res.data.LotAddress;
+                            }
+
+                            $('#MainAddress').val(addr);
+                            $('#PostNo').val(res.data.PostNo);
+                            $('#SubAddress').val(res.data.SubAddress);
+                            $('#RcvName').val(res.data.RcvName);
+                            $('#ContactNo').val(res.data.ContactNo);
+                            $('#ReqMsg').val(res.data.ReqMsg);
+                        },
+                        error: function(xhr, status, error) {
+                            if (xhr.status == 401) {
+                                Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                    location.href = location.href;
+                                });
+                            }
+                            else {
+                                Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                            }
+                        }
+                    });
+                });
+
+                $('#btn-subs-cancel').on('click', function(e){
+                    e.preventDefault();
+
+                    var ono = $('#OrderNo').val();
+
+                    Swal.fire({
+                        title: "주문 취소",
+                        html: `주문 취소하시겠습니까?<br>
+                        주문 취소에 대해서 고객이 인지하고 있는지 확인 해주세요.`,
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "네, 주문취소",
+                        cancelButtonText: "아니요",
+                    }).then(function(result){
+                        if (result.value){
+                            $.ajax({
+                                cache : false,
+                                url : "/api/order/cancel/" + ono,
+                                type : 'POST',
+                                success : function(data) {
+                                    if(data.code < 0) {
+                                        Swal.fire("경고", data.msg, "warning");
+                                    }
+                                    else {
+                                        Swal.fire("성공", "주문 취소 완료!", "success").then(function(result) {
+                                            if (result.value) {
+                                                location.href=location.href;
+                                            }
+                                        });
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    if (xhr.status == 401) {
+                                        Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                            location.href = location.href;
+                                        });
+                                    }
+                                    else {
+                                        Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                                    }
+                                }
+                            });
+                        }
+                    });
+                });
+
+                $("#form-submit-btn").on('click', function(event){
+                    event.preventDefault();
+
+                    //form 유효성 검사
+                    var form = $("#form-basic")
+
+                    if (form[0].checkValidity() === false)
+                    {
+                        event.stopPropagation();
+
+                        form.addClass('was-validated');
+                        return false;
+                    }
+
+                    if ($('#PaymentPrice').val() < 1000) {
+                        Swal.fire("경고", "결제금액이 1000원 미만으로 설정할 수 없습니다.", "warning");
+                        return false;
+                    }
+
+                    //form submit ajax
+                    var formData = form.serializeJSON();
+
+                    Swal.fire({
+                        title: "주문 변경",
+                        html: `주문 정보를 변경하시겠습니까?<br>
+                        변경되는 주문 정보에 대해서 고객이 인지하고 있는지 확인 해주세요.`,
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "네, 정보변경",
+                        cancelButtonText: "아니요",
+                    }).then(function(result){
+                        if (result.value){
+                            $.ajax({
+                                cache : false,
+                                url : "/api/order/set",
+                                type : 'POST',
+                                contentType: "application/json; charset=utf-8",
+                                data : JSON.stringify(formData),
+                                dataType: 'json',
+                                success : function(data) {
+                                    if(data.code < 0) {
+                                        Swal.fire("경고", data.msg, "warning");
+                                    }
+                                    else {
+                                        Swal.fire("성공", "주문 정보 변경 완료!", "success").then(function(result) {
+                                            if (result.value) {
+                                                location.href=location.href;
+                                            }
+                                        });
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    if (xhr.status == 401) {
+                                        Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                            location.href = location.href;
+                                        });
+                                    }
+                                    else {
+                                        Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                                    }
+                                }
+                            });
+                        }
+                    });
+                });
+
+                $('#OrderPrice').trigger('change');
+
+                var highlights = ['REQ','HATE'];
+
+                $.ajax({
+                    cache : false,
+                    url : "/api/tag/info",
+                    data: {
+                        "taggroupno" : {{.info.TagGroupNo}},
+                    },
+                    type : 'GET',
+                    dataType: 'json',
+                    success : function(d) {
+                        var innerHtml = ``;
+                        var rows = ["", "",  "", "", "", ""];
+                        d.data.forEach(function(group, index) {
+                            var itemsHtml = '';
+                            group.Tags.forEach(function(tags, index) {
+                                itemsHtml += `<span class="badge badge-pill ${tags.TagType.includes("REQ") ? "badge-success" : tags.TagType.includes("HATE") ? "badge-danger" : "border border-dark text-dark"} mr-1">${tags.TagLabel}${(tags.TagValue ? ": " + tags.TagValue : "")}</span>`;
+                            });
+
+                            if (group.TagType == 'FAMILY' || group.TagType == 'HEALTH') {
+                                rows[0] += `<div class="col-4 p-1"><div>
+                                    <div class="fw-700 mb-1"><i class="fal fa-tag"></i> ${group.TagTypeDesc}</div>
+                                    <div class="fs-xl">${itemsHtml}</div>
+                                </div></div>`;
+                            }
+                            else if (group.TagType.includes('RICE') || group.TagType.includes('MEAL')) {
+                                rows[1] += `<div class="col-4 p-1"><div>
+                                    <div class="fw-700 mb-1"><i class="fal fa-tag"></i> ${group.TagTypeDesc}</div>
+                                    <div class="fs-xl">${itemsHtml}</div>
+                                </div></div>`;
+                            }
+                            else if (group.TagType.includes('FRUIT')) {
+                                rows[2] += `<div class="col-3 p-1"><div>
+                                    <div class="fw-700 mb-1"><i class="fal fa-tag"></i> ${group.TagTypeDesc}</div>
+                                    <div class="fs-xl">${itemsHtml}</div>
+                                </div></div>`;
+                            }
+                            else if (group.TagType.includes('VEGET')) {
+                                rows[3] += `<div class="col-3 p-1"><div>
+                                    <div class="fw-700 mb-1"><i class="fal fa-tag"></i> ${group.TagTypeDesc}</div>
+                                    <div class="fs-xl">${itemsHtml}</div>
+                                </div></div>`;
+                            }
+                            else if (group.TagType == 'LIFE_STYLE') {
+                                rows[4] += `<div class="col-12 p-1"><div>
+                                    <div class="fw-700 mb-1"><i class="fal fa-tag"></i> ${group.TagTypeDesc}</div>
+                                    <div class="fs-xl">${itemsHtml}</div>
+                                </div></div>`;
+                            }
+                            else {
+                                rows[5] += `<div class="col-4 p-1"><div>
+                                    <div class="fw-700 mb-1"><i class="fal fa-tag"></i> ${group.TagTypeDesc}</div>
+                                    <div class="fs-xl">${itemsHtml}</div>
+                                </div></div>`;
+                            }
+                        });
+
+                        rows.forEach(function(row, index) {
+                            if (row.length > 0) {
+                                innerHtml += `<div class="row p-2 m-2 border-bottom">${row}</div>`;
+                            }
+                        });
+
+                        if(innerHtml == '') {
+                            innerHtml = '<div class="col-12"><span class="fs-xl fw-700 text-danger">태그정보 없음</span></div>';
+                        }
+
+                        $('#tagSection').append(innerHtml);
+                    },
+                    error: function(xhr, status, error) {
+                        if (xhr.status == 401) {
+                            Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                location.href = location.href;
+                            });
+                        }
+                        else {
+                            Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                        }
+                    }
+                });
+
+                $.ajax({
+                    cache : false,
+                    url : "/api/review/list",
+                    data: {
+                        "orderno": {{.info.OrderNo}}
+                    },
+                    type : 'GET',
+                    dataType: 'json',
+                    success : function(d) {
+                        var innerHtml = ``;
+                        d.data.forEach(function(review, index) {
+                            innerHtml += `
+                            <div class="col-12">
+                                <div class="p-1">
+                                    <div class="fs-lg fw-500 mb-2" style="white-space: pre-line;">${review.ReviewDesc}</div>
+                                    <div class="fs-xl">`;
+
+                            review.ItemReview.forEach(function(item, index) {
+                                innerHtml += `<span class="badge badge-pill border border-dark text-dark mr-1">${item.ItemName} ★${item.ReviewScore}</span>`;
+                            });
+
+                            innerHtml += "</div></div></div>";
+                        });
+
+                        if(innerHtml == '') {
+                            innerHtml = '<div class="col-12"><span class="fs-xl fw-700 text-danger">리뷰 미작성</span></div>';
+                        }
+
+                        $('#reviewSection').append(innerHtml);
+                    },
+                    error: function(xhr, status, error) {
+                        if (xhr.status == 401) {
+                            Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                location.href = location.href;
+                            });
+                        }
+                        else {
+                            Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                        }
+                    }
+                });
+            })();
+        </script>
+
+    </body>
+    <!-- END Body -->
+</html>
+{{ end }}

@@ -1,0 +1,183 @@
+{{ define "account/login.html" }}
+<!DOCTYPE html>
+<html lang="ko" class="root-text-sm">
+    <head>
+        {{ template "html-head.tmpl" . }}
+        <link rel="stylesheet" media="screen, print" href="/contents/css/page-login-alt.css">
+    </head>
+
+    <!-- BEGIN Body -->
+    <body>
+        {{ template "body-header-script.tmpl" . }}
+
+        <div class="blankpage-form-field">
+            <div
+                class="page-logo m-0 w-100 align-items-center justify-content-center rounded border-bottom-left-radius-0 border-bottom-right-radius-0 px-4">
+                <a href="javascript:void(0)" class="page-logo-link press-scale-down d-flex align-items-center">
+                    <img src="/contents/img/favicon/favicon-32x32.png" alt="큐잇 Admin" aria-roledescription="logo">
+                    <span class="page-logo-text mr-1">큐잇 Admin</span>
+                </a>
+            </div>
+            <div class="card p-4 border-top-left-radius-0 border-top-right-radius-0">
+                <form method="POST" id="login-form">
+                    <div class="form-group">
+                        <label class="form-label" for="username">Admin ID</label>
+                        <input type="text" name="username" id="username" class="form-control" placeholder="ID를 입력하세요" value="" required>
+                        <div class="invalid-feedback">ID를 입력해주세요.</div>
+                        <span class="help-block">
+
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" name="password" id="password" class="form-control" placeholder="패스워드를 입력하세요" value="" required>
+                        <div class="invalid-feedback">패스워드를 입력해주세요.</div>
+                        <span class="help-block">
+
+                        </span>
+                    </div>
+                    <div class="form-group text-left">
+                        <span class="help-block">
+                            계정 문의는 담당부서를 통해 해주시기 바랍니다.
+                        </span>
+                    </div>
+                    <button type="submit" class="btn btn-default float-right" id="login-btn">로그인</button>
+                </form>
+            </div>
+            <div class="blankpage-footer text-dark text-center">
+                <strong>
+                이 사이트는 지정된 관계인만을 위해 만들어졌으며,<br>
+                중요한 정보나 저작권을 포함하고 있을 수 있습니다.<br>
+                어떠한 권한 없이 본 사이트에 포함된 <br>
+                정보의 전부 또는 일부를 무단으로 제3자에게 공개, 배포, 복사 또는 사용하는 것을 엄격히 금지합니다.
+                </strong>
+            </div>
+        </div>
+
+        <!-- modal alert -->
+        <div class="modal modal-alert" id="ie-modal-alert" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Internet Explorer 지원 중단</h5>
+                    </div>
+                    <div class="modal-body">
+                        현재 사용하시는 Internet Explorer 브라우저로 사용 하실 수 없습니다.<br>
+                        원활한 사용을 위해 더욱 안전하고 빠른 Microsoft Edge 브라우저를 사용해 주세요.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="btn-open-edge">Edge 브라우저로 열기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <video poster="/contents/media/video/vvv.png" id="bgvid" playsinline autoplay muted loop>
+            <source src="/contents/media/video/vvv.webm" type="video/webm">
+            <source src="/contents/media/video/vvv.mp4" type="video/mp4">
+        </video>
+
+        <!-- BEGIN Color profile -->
+        <!-- this area is hidden and will not be seen on screens or screen readers -->
+        <!-- we use this only for CSS color refernce for JS stuff -->
+        <p id="js-color-profile" class="d-none">
+            <span class="color-primary-50"></span>
+            <span class="color-primary-100"></span>
+            <span class="color-primary-200"></span>
+            <span class="color-primary-300"></span>
+            <span class="color-primary-400"></span>
+            <span class="color-primary-500"></span>
+            <span class="color-primary-600"></span>
+            <span class="color-primary-700"></span>
+            <span class="color-primary-800"></span>
+            <span class="color-primary-900"></span>
+            <span class="color-info-50"></span>
+            <span class="color-info-100"></span>
+            <span class="color-info-200"></span>
+            <span class="color-info-300"></span>
+            <span class="color-info-400"></span>
+            <span class="color-info-500"></span>
+            <span class="color-info-600"></span>
+            <span class="color-info-700"></span>
+            <span class="color-info-800"></span>
+            <span class="color-info-900"></span>
+            <span class="color-danger-50"></span>
+            <span class="color-danger-100"></span>
+            <span class="color-danger-200"></span>
+            <span class="color-danger-300"></span>
+            <span class="color-danger-400"></span>
+            <span class="color-danger-500"></span>
+            <span class="color-danger-600"></span>
+            <span class="color-danger-700"></span>
+            <span class="color-danger-800"></span>
+            <span class="color-danger-900"></span>
+            <span class="color-warning-50"></span>
+            <span class="color-warning-100"></span>
+            <span class="color-warning-200"></span>
+            <span class="color-warning-300"></span>
+            <span class="color-warning-400"></span>
+            <span class="color-warning-500"></span>
+            <span class="color-warning-600"></span>
+            <span class="color-warning-700"></span>
+            <span class="color-warning-800"></span>
+            <span class="color-warning-900"></span>
+            <span class="color-success-50"></span>
+            <span class="color-success-100"></span>
+            <span class="color-success-200"></span>
+            <span class="color-success-300"></span>
+            <span class="color-success-400"></span>
+            <span class="color-success-500"></span>
+            <span class="color-success-600"></span>
+            <span class="color-success-700"></span>
+            <span class="color-success-800"></span>
+            <span class="color-success-900"></span>
+            <span class="color-fusion-50"></span>
+            <span class="color-fusion-100"></span>
+            <span class="color-fusion-200"></span>
+            <span class="color-fusion-300"></span>
+            <span class="color-fusion-400"></span>
+            <span class="color-fusion-500"></span>
+            <span class="color-fusion-600"></span>
+            <span class="color-fusion-700"></span>
+            <span class="color-fusion-800"></span>
+            <span class="color-fusion-900"></span>
+        </p>
+        <!-- END Color profile -->
+
+        {{ template "body-footer-script.tmpl" . }}
+
+        <script>
+            $(document).ready(function() {
+                "use strict"
+
+                if (myapp_config.isIE) {
+                    $('#ie-modal-alert').modal('show');
+                }
+
+                if ("" != "{{ .ErrorTitle }}") {
+                    Swal.fire("{{ .ErrorTitle }}", "{{ .ErrorMessage }}", "warning");
+                }
+            });
+
+            $('#btn-open-edge').click(function(e) {
+                window.location = "microsoft-edge:" + location.href;
+            });
+
+            $("#login-btn").click(function(event) {
+                var form = $("#login-form")
+
+                if (form[0].checkValidity() === false)
+                {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+
+                form.addClass('was-validated');
+            });
+
+        </script>
+    </body>
+    <!-- END Body -->
+
+</html>
+{{ end }}

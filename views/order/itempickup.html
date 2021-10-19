@@ -1,0 +1,841 @@
+{{ define "order/itempickup.html" }}
+
+<!DOCTYPE html>
+<html lang="ko" class="root-text-sm">
+    <head>
+        {{ template "html-head.tmpl" . }}
+
+        <link rel="stylesheet" media="screen, print" href="/contents/css/datagrid/datatables/datatables.bundle.css">
+        <link rel="stylesheet" media="screen, print" href="/contents/css/formplugins/select2/select2.bundle.css">
+    </head>
+
+    <!-- BEGIN Body -->
+    <body class="mod-bg-1 mod-nav-link mod-skin-light">
+
+        {{ template "body-header-script.tmpl" . }}
+
+        <!-- BEGIN Page Wrapper -->
+        <div class="page-wrapper">
+            <div class="page-inner">
+                {{ template "body-left-aside.tmpl" . }}
+
+                <div class="page-content-wrapper">
+
+                    {{ template "page-header.tmpl" . }}
+
+                    <!-- BEGIN Page Content -->
+                    <!-- the #js-page-content id is needed for some plugins to initialize -->
+                    <main id="js-page-content" role="userlist" class="page-content">
+                        <div class="subheader">
+                            <h1 class="subheader-title">
+                                <i class='subheader-icon far fa-th-list'></i> <span class='fw-500'>{{.title}}</span>
+                            </h1>
+                        </div>
+                        <div class="row">
+                            <div class="col-xl-12">
+                                <div id="panel-1" class="panel">
+                                    <div class="panel-hdr">
+                                        <h2><span class="fw-700"><i></i>상품 구성 주문 내역</span></h2>
+                                    </div>
+                                    <div class="panel-container">
+                                        <div class="panel-content">
+                                            <table id="dt-first" class="table table-bordered table-hover table-striped w-100 text-nowrap">
+                                                <thead class="thead-dark">
+                                                </thead>
+                                            </table>
+                                            <!-- datatable end -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-6">
+                                <div id="panel-2" class="panel">
+                                    <div class="panel-hdr">
+                                        <h2>
+                                            <span class="fw-700"><i></i>주문 정보</span>
+                                        </h2>
+                                    </div>
+                                    <div class="panel-container">
+                                        <div class="panel-content">
+                                            <div class="order-item-manage d-none">
+                                                <div class="m-3" id="infoSection"></div>
+                                                <span class="fw-700 m-1"><i></i>과거 주문 이력</span>
+                                                <div class="m-3" id="prevOrderSection"></div>
+                                                <span class="fw-700 m-1"><i></i>태그 정보</span>
+                                                <div class="m-1" id="tagSection">
+                                                </div>
+                                                <span class="fw-700 m-1"><i></i>상담 내역</span>
+                                                <div class="m-1">
+                                                    <table id="dt-counsel" class="table table-bordered table-hover table-striped w-100 text-nowrap">
+                                                        <thead class="thead-dark">
+                                                        </thead>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-6">
+                                <div id="panel-3" class="panel">
+                                    <div class="panel-hdr">
+                                        <h2><span class="fw-700"><i></i>상품 구성</span></h2>
+                                    </div>
+                                    <div class="panel-container">
+                                        <div class="panel-content">
+                                            <div class="order-item-manage d-none">
+                                                <form class="needs-validation" id="form-orderitem" novalidate>
+                                                    <input type="hidden" name="OrderNo" id="OrderNo" value="">
+                                                    <div class="row m-3">
+                                                        <div class="col-4">
+                                                            <button class="btn btn-outline-primary btn-sm" id="addItem" type="button"><i class="fas fa-plus"></i> 상품 추가</button>
+                                                        </div>
+                                                        <div class="col-8">
+                                                            <span>판매가: </span><span class="fs-lg fw-900 text-success" id="OrderPrice">0</span> /
+                                                            <span>단가: </span><span class="fs-lg fw-900 text-gradient" id="sumPrice">0</span> /
+                                                            <span>마진: </span><span class="fs-lg fw-900 text-danger" id="marginPrice">0</span>(<span class="fs-lg fw-900 text-danger" id="marginRate">0</span>%)
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-12">
+                                                            <table class="table table-hover" id="itemTable" data-isedit="false">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width: 15%">#</th>
+                                                                        <th style="width: 60%">상품</th>
+                                                                        <th style="width: 25%">수량</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row m-3">
+                                                        <div class="col-8">
+                                                            <select class="select2 form-control" id="BundleNo">
+                                                                <option value="">상품 번들 선택 ...</option>
+                                                                {{ range .bundlelist }}
+                                                                    <option value="{{.BundleNo}}">{{.BundleName}}</option>
+                                                                {{ end }}
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-4">
+                                                            <button class="btn btn-outline-info btn-sm" id="loadBundle" type="button">불러오기</button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="panel-content border-faded border-left-0 border-right-0 border-bottom-0 d-flex flex-row align-items-center">
+                                                        <button class="btn btn-primary ml-auto" type="submit" id="form-submit-btn">저장</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    <!-- this overlay is activated only when mobile menu is triggered -->
+                    <div class="page-content-overlay" data-action="toggle" data-class="mobile-nav-on"></div>
+                    <!-- END Page Content -->
+
+                    {{ template "page-footer.tmpl" . }}
+                </div>
+            </div>
+        </div>
+
+        {{ template "body-footer.tmpl" . }}
+
+        {{ template "body-footer-script.tmpl" . }}
+
+        <script src="/contents/js/formplugins/jquery.serializeJSON.js"></script>
+        <script src="/contents/js/formplugins/select2/select2.bundle.js"></script>
+        <script src="/contents/js/datagrid/datatables/datatables.bundle.js"></script>
+        <script>
+            var itemList = [];
+
+            var counselData = {};
+            var counselDt = $('#dt-counsel').DataTable({
+                pageLength: 3,
+                oLanguage: {
+                    sEmptyTable: "데이터가 없습니다.",
+                    sInfo: "_START_ 부터 _END_ 까지, 총 _TOTAL_ 개",
+                    sInfoEmpty: "검색 결과 없음",
+                    sInfoFiltered: "(전체 _MAX_ 개 중)",
+                    sThousands: ",",
+                    sLengthMenu: "_MENU_ 개씩 보기",
+                    sLoadingRecords: "Loading...",
+                    sProcessing: "Processing...",
+                    sSearchPlaceholder: "검색",
+                    sZeroRecords: "검색된 내용이 없습니다."
+                },
+                dom:"<'row'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>" +
+                    "<'row mb-3'<'col-sm-12'tr>>",
+                ajax: {
+                    url: "/api/counsel/list",
+                    data: function() {
+                        return counselData;
+                    },
+                    error: function(xhr, status, error) {
+                        if (xhr.status == 401) {
+                            Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                location.href = location.href;
+                            });
+                        }
+                        else {
+                            Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                        }
+                    }
+                },
+                columns: [
+                    {
+                        title: "No.",
+                        data: "CounselNo",
+                    },
+                    {
+                        "width": "80%",
+                        title: "상담내용",
+                        data: "CounselDesc",
+                        render: function(data, type, row) {
+                            return `<span style="white-space: pre-line;">${data}</span>`
+                        }
+                    },
+                    {
+                        title: "등록일",
+                        data: "RegDate",
+                        render: function(data, type, row) {
+                            return moment(data).format("YYYY-MM-DD HH:mm")
+                        }
+                    },
+                    {
+                        title: "등록자",
+                        data: "RegUser",
+                    },
+                ],
+                order: [[0, 'desc']],
+                responsive: true,
+                autoWidth: false,
+            });
+
+            async function GetItemList() {
+                var list = [];
+
+                await $.ajax({
+                    cache: false,
+                    url: "/api/item/list",
+                    type: 'GET',
+                    data: {
+                        "status": "",
+                    },
+                    dataType: 'json',
+                    //async: false,
+                    success : function(d) {
+                        list = d.data;
+                    },
+                    error: function(xhr, status, error) {
+                        if (xhr.status == 401) {
+                            Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                location.href = location.href;
+                            });
+                        }
+                        else {
+                            Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                        }
+                    },
+                });
+
+                return list
+            }
+
+            function GetItemSelectHtml(iNo) {
+                var oHtml = `<tr>
+                <td><button class="btn btn-outline-danger btn-sm deleteItem"><i class="fas fa-trash-alt"></i></button></td>
+                <td>
+                    <select class="select2 custom-select selectItemNo" name="items[][ItemNo]" required>
+                        <option value="" data-itemprice="0">선택 ...</option>`;
+                itemList.forEach(function(el){
+                    if (el.StatusCode == 'normal' || el.ItemNo == iNo) {
+                        oHtml += `<option value="${el.ItemNo}" data-itemprice="${el.UnitPrice}">${el.StatusCode!="normal"?"(비활성화) ":""}${el.ItemName}(${el.UnitAmt}${el.UnitType}/${el.UnitPrice}원)</option>`;
+                    }
+                });
+                oHtml += `</select>
+                        <div class="invalid-feedback">상품을 선택해주세요</div>
+                    </td>
+                    <td>
+                        <input type="number" class="form-control inputItemCnt" name="items[][ItemCnt]" placeholder="수량" value="1" min="1" required>
+                        <div class="invalid-feedback">개수를 입력해주세요</div>
+                    </td>
+                </tr>`
+
+                return oHtml;
+            }
+
+            function CalcPrice() {
+                var oprice = 0;
+                var sum = 0;
+                var margin = 0;
+                var mrate = 0.00;
+
+                oprice = parseInt($('#OrderPrice').html().replace(/,/g,''));
+
+                $('#itemTable tbody tr').each(function() {
+                    sum += $(this).find('option:selected').data('itemprice') * $(this).find('.inputItemCnt').val();
+                });
+
+                margin = oprice - sum;
+
+                mrate = 1 - (sum / oprice);
+
+                $('#sumPrice').html(sum.toLocaleString());
+                $('#marginPrice').html(margin.toLocaleString());
+                $('#marginRate').html((mrate*100).toFixed(2));
+            }
+
+            function DisplayPrevOrder(row) {
+                $('#prevOrderSection').empty();
+
+                $.ajax({
+                    cache : false,
+                    url : "/api/order/prevlist",
+                    data: {
+                        "orderno": row.OrderNo,
+                        "userno": row.UserNo,
+                        "subsno": row.SubsNo,
+                    },
+                    type : 'GET',
+                    dataType: 'json',
+                    success : function(d) {
+                        if (d.data.length < 1) {
+                            $('#prevOrderSection').html(`주문이력 없음`);
+                            return;
+                        }
+
+                        var innerHtml = ``;
+                        var indicators = '';
+                        var orders = '';
+                        d.data.forEach(function(o, index) {
+                            var items = '';
+
+                            o.ItemList.forEach(function(item) {
+                                items += `<span class="badge badge-pill border border-dark text-dark mr-1 mb-1">
+                                    ${item.ItemName} ${item.UnitAmt}${item.UnitType} ${(item.ItemCnt > 1 ? " x" + item.ItemCnt : "")}
+                                    <span class="fs-lg text-gradient">${item.ReviewScore > 0 ? "★" + item.ReviewScore : ""}</span>
+                                </span>`;
+                            });
+
+                            indicators += `<li data-target="#carousel-1" data-slide-to="${index}" class="${(index==0?"active":"")}"></li>`;
+
+                            orders += ` <div class="carousel-item ${(index==0?"active":"")}">
+                                            <div class="card border shadow-0">
+                                                <div class="card-header py-0 px-4">
+                                                    <div class="p-3 d-flex flex-row">
+                                                        <div class="d-block ml-2">
+                                                            <span class="text-dark h6 font-weight-bold text-uppercase d-block m-0">
+                                                                ${o.OrderRound + "회차"} / <span class="fw-300">${o.StatusDesc} / 배송일 ${moment(o.ReqDelivDate).format("YYYY-MM-DD")}</span>
+                                                            </span>
+                                                            <span class="fs-sm text-mute h6 fw-500 mb-0 d-block">[ ${o.BoxTypeDesc} ] ${o.CateTypeDesc}</span>
+                                                            <div class="fs-lg py-1">${items}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body py-1 px-6 text-dark" style="min-height:160px;">
+                                                    <p class="px-3 pb-6" style="white-space: pre-line;">
+                                                        ${o.ReviewDesc != null ? o.ReviewDesc : "리뷰 미작성"}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>`;
+                        });
+
+                        innerHtml = `<div id="carousel-1" class="carousel slide" data-interval="false">
+                            <ol class="carousel-indicators">${indicators}</ol>
+                            <div class="carousel-inner">${orders}</div>
+                            <a class="carousel-control-prev" href="#carousel-1" role="button" data-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="sr-only">이전</span>
+                            </a>
+                            <a class="carousel-control-next" href="#carousel-1" role="button" data-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="sr-only">다음</span>
+                            </a>
+                        </div>`;
+
+                        $('#prevOrderSection').html(innerHtml);
+                    },
+                    error: function(xhr, status, error) {
+                        if (xhr.status == 401) {
+                            Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                location.href = location.href;
+                            });
+                        }
+                        else {
+                            Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                        }
+                    }
+                });
+
+                $('.carousel').carousel({
+                    interval: false,
+                });
+            }
+
+            $(document).ready(function() {
+                GetItemList().then(function(result) {
+                    itemList = result;
+                });
+
+                $('.select2').select2();
+
+                // initialize datatable
+                var dttable = $('#dt-first').DataTable({
+                    scrollCollapse: true,
+                    scroller: true,
+                    scrollX: true,
+                    fixedColumns:
+                    {
+                        leftColumns: 1,
+                    },
+                    scrollY: 250,
+                    oLanguage: {
+                        sEmptyTable: "데이터가 없습니다.",
+                        sInfo: "_START_ 부터 _END_ 까지, 총 _TOTAL_ 개",
+                        sInfoEmpty: "검색 결과 없음",
+                        sInfoFiltered: "(전체 _MAX_ 개 중)",
+                        sThousands: ",",
+                        sLengthMenu: "_MENU_ 개씩 보기",
+                        sLoadingRecords: "Loading...",
+                        sProcessing: "Processing...",
+                        sSearchPlaceholder: "검색",
+                        sZeroRecords: "검색된 내용이 없습니다."
+                    },
+                    dom:"<'row mb-1'<'col-sm-12 col-md-12 d-flex align-items-center justify-content-end'>>" +
+                        "<'row mb-1'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'l>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>" +
+                        "<'row mb-1'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                    select: {
+                        style: 'single',
+                        toggleable: false,
+                    },
+                    ajax: {
+                        url: "/api/order/list",
+                        data: {
+                            status: "init|stanby-payment|ready-delivery|in-delivery",
+                            isthisweek: true,
+                        },
+                        error: function(xhr, status, error) {
+                            if (xhr.status == 401) {
+                                Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                    location.href = location.href;
+                                });
+                            }
+                            else {
+                                Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                            }
+                        }
+                    },
+                    columns: [
+                        {
+                            title: "No.",
+                            data: "OrderNo",
+                        },
+                        {
+                            title: "회원",
+                            data: "UserName"
+                        },
+                        {
+                            title: "수취인",
+                            data: "RcvName"
+                        },
+                        {
+                            title: "상태",
+                            render: function(data, type, row, meta) {
+                                var str = "";
+
+                                if (row.StatusCode == "init") {
+                                    str = `<span class="badge badge-pill badge-info fs-md">${row.StatusDesc}</span>`;
+                                }
+                                else if (row.StatusCode == "done") {
+                                    str = `<span class="badge badge-pill badge-success fs-md">${row.StatusDesc}</span>`;
+                                }
+                                else if (row.StatusCode.includes("payment")) {
+                                    str = `<span class="badge badge-pill badge-danger fs-md">${row.StatusDesc}</span>`;
+                                }
+                                else if (row.StatusCode.includes("delivery")) {
+                                    str = `<span class="badge badge-pill badge-warning fs-md">${row.StatusDesc}</span>`;
+                                }
+                                else {
+                                    str = `<span class="badge badge-pill badge-dark fs-md">${row.StatusDesc}</span>`;
+                                }
+
+                                return str;
+                            }
+                        },
+                        {
+                            title: "유형",
+                            render: function(data, type, row, meta){
+                                return `${row.OrderTypeDesc}<br>${(row.OrderRound ? "(" + row.OrderRound + "회차)" : "")}`;
+                            },
+                        },
+                        {
+                            title: "금액",
+                            render: function(data, type, row, meta){
+                                return `${row.OrderPrice.toLocaleString()}${(row.DiscountPrice > 0 ? '<br><span class="badge badge-danger badge-pill">할인</span> -' + row.DiscountPrice.toLocaleString() + "<br> = " + (row.OrderPrice - row.DiscountPrice).toLocaleString() : "")}`;
+                            },
+                        },
+                        {
+                            title: "구성",
+                            render: function(data, type, row, meta){
+                                return `${row.BoxTypeDesc}<br>(${row.CateTypeDesc})`;
+                            },
+                        },
+                        {
+                            title: "상품",
+                            data: "ItemsString",
+                            render: function(data, type) {
+                                if(data) {
+                                    str = [];
+
+                                    data.split('|').forEach(function(item, index) {
+                                        str.push(`<span class="badge border border-info text-dark">${item}</span>`);
+                                        if(index % 3 == 2) {
+                                            str.push('<br>');
+                                        }
+                                    })
+
+                                    return str.join(' ');
+                                }
+                                else {
+                                    return "<code>구성된 상품이 없습니다</code>";
+                                }
+                            },
+                        },
+                        {
+                            title: "배송일",
+                            data: "ReqDelivDate",
+                            render: function(data, type, row, meta) {
+                                return `${moment(data).format("YYYY-MM-DD")}`;
+                            }
+                        },
+                    ],
+                });
+
+                dttable.on('user-select', function(e, dt, type, cell, originalEvent) {
+                    if($('#itemTable').data('isedit')) {
+                        if(!confirm('변경내용이 저장되지 않았습니다. 이동하시겠습니까?')) {
+                            e.preventDefault();
+                        }
+                    }
+                });
+
+                //주문 선택
+                dttable.on('select.dt', function(e, dt, type, indexes) {
+                    GetItemList().then(function(result) {
+                        itemList = result;
+                    });
+
+                    var rowData = dt.row(indexes).data();
+
+                    $('.order-item-manage').removeClass('d-none');
+
+                    // 주문 정보 노출
+                    $('#infoSection').empty();
+
+                    var infoHtml = '';
+                    infoHtml += `<div class="col-12 card border shadow-0">
+                                    <div class="card-body border-faded border-top-0 border-left-0 border-right-0 rounded-top">
+                                        <div class="d-flex flex-row align-items-center">
+                                            <div class="info-card-text flex-1">
+                                                <span class="fw-700 fs-xl text-info">${rowData.UserName} (${rowData.UserPhone})</span>
+                                                <span class="">${rowData.RcvName} (${rowData.ContactNo})</span>
+                                                <span class="">
+                                                    ${rowData.UserGender == "male" ? "남자" : rowData.UserGender == "female" ? "여자" : "성별정보없음"}
+                                                    ${rowData.BirthDay != null ? " / " +  moment().subtract(moment(rowData.BirthDay).year(), 'years').year() + "세(" + moment(rowData.BirthDay).format("YY년M월D일") + ")" : " / 생년정보없음"}
+                                                </span>
+                                                <span class="">${rowData.MainAddress}, ${rowData.SubAddress}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0 collapse show">
+                                        <div class="p-3">
+                                            <span class="mt-1 d-block fs-sm fw-400 text-dark">
+                                                <i class="fas fa-calendar-check text-muted mr-2"></i>${rowData.SubsNo > 0 ? rowData.SubsSeq + "번째 구독 " + rowData.OrderRound + "회차 (주기 " + rowData.PeriodDay + "일)"  : "단건"}
+                                            </span>
+                                            <span class="mt-1 d-block fs-sm fw-700 text-info">
+                                                <i class="fas fa-box-full text-muted mr-2"></i>[ ${rowData.BoxTypeDesc} ] ${rowData.CateTypeDesc}
+                                            </span>
+                                            <span class="mt-1 d-block fs-sm fw-400 text-dark">
+                                                <i class="fas fa-truck text-muted mr-2"></i>배송예정 ${moment(rowData.ReqDelivDate).format("YYYY-MM-DD")}
+                                            </span>
+                                            <div class="mt-1 d-block fs-sm fw-400 text-dark">
+                                                ${rowData.AddnlDesc != null ? rowData.AddnlDesc : "요청사항 없음"}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>`;
+
+                    $('#infoSection').append(infoHtml);
+
+                    // 과거 주문 이력 노출
+                    DisplayPrevOrder(rowData);
+
+                    // 태그 정보 노출
+                    $('#tagSection').empty();
+
+                    var highlights = ['REQ','HATE'];
+
+                    $.ajax({
+                        cache : false,
+                        url : "/api/tag/info",
+                        data: {
+                            "taggroupno" : rowData.TagGroupNo,
+                        },
+                        type : 'GET',
+                        dataType: 'json',
+                        success : function(d) {
+                            var innerHtml = ``;
+                            var rows = ["", "",  "", "", "", ""];
+                            d.data.forEach(function(group, index) {
+                                var itemsHtml = '';
+                                group.Tags.forEach(function(tags, index) {
+                                    itemsHtml += `<span class="badge badge-pill ${tags.TagType.includes("REQ") ? "badge-success" : tags.TagType.includes("HATE") ? "badge-danger" : "border border-dark text-dark"} mr-1">${tags.TagLabel}${(tags.TagValue ? ": " + tags.TagValue : "")}</span>`;
+                                });
+
+                                if (group.TagType == 'FAMILY' || group.TagType == 'HEALTH') {
+                                    rows[0] += `<div class="col-4 p-1"><div>
+                                        <div class="fw-700 mb-1"><i class="fal fa-tag"></i> ${group.TagTypeDesc}</div>
+                                        <div class="fs-xl">${itemsHtml}</div>
+                                    </div></div>`;
+                                }
+                                else if (group.TagType.includes('RICE') || group.TagType.includes('MEAL')) {
+                                    rows[1] += `<div class="col-4 p-1"><div>
+                                        <div class="fw-700 mb-1"><i class="fal fa-tag"></i> ${group.TagTypeDesc}</div>
+                                        <div class="fs-xl">${itemsHtml}</div>
+                                    </div></div>`;
+                                }
+                                else if (group.TagType.includes('FRUIT')) {
+                                    rows[2] += `<div class="col-3 p-1"><div>
+                                        <div class="fw-700 mb-1"><i class="fal fa-tag"></i> ${group.TagTypeDesc}</div>
+                                        <div class="fs-xl">${itemsHtml}</div>
+                                    </div></div>`;
+                                }
+                                else if (group.TagType.includes('VEGET')) {
+                                    rows[3] += `<div class="col-3 p-1"><div>
+                                        <div class="fw-700 mb-1"><i class="fal fa-tag"></i> ${group.TagTypeDesc}</div>
+                                        <div class="fs-xl">${itemsHtml}</div>
+                                    </div></div>`;
+                                }
+                                else if (group.TagType == 'LIFE_STYLE') {
+                                    rows[4] += `<div class="col-12 p-1"><div>
+                                        <div class="fw-700 mb-1"><i class="fal fa-tag"></i> ${group.TagTypeDesc}</div>
+                                        <div class="fs-xl">${itemsHtml}</div>
+                                    </div></div>`;
+                                }
+                                else {
+                                    rows[5] += `<div class="col-4 p-1"><div>
+                                        <div class="fw-700 mb-1"><i class="fal fa-tag"></i> ${group.TagTypeDesc}</div>
+                                        <div class="fs-xl">${itemsHtml}</div>
+                                    </div></div>`;
+                                }
+                            });
+
+                            rows.forEach(function(row, index) {
+                                if (row.length > 0) {
+                                    innerHtml += `<div class="row p-2 m-2 border-bottom">${row}</div>`;
+                                }
+
+                            });
+
+                            if(innerHtml == '') {
+                                innerHtml = '<div class="col-12"><span class="fs-xl fw-700 text-danger">태그정보 없음</span></div>';
+                            }
+
+                            $('#tagSection').append(innerHtml);
+                        },
+                        error: function(xhr, status, error) {
+                            if (xhr.status == 401) {
+                                Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                    location.href = location.href;
+                                });
+                            }
+                            else {
+                                Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                            }
+                        }
+                    });
+
+                    counselData = {userno: rowData.UserNo, subsno: rowData.SubsNo};
+                    counselDt.ajax.reload(null, true);
+
+                    //상품 구성 설정
+                    $('#OrderNo').val(rowData.OrderNo);
+
+                    var oPrice = rowData.OrderPrice;
+
+                    if (rowData.OrderType == 'ONCE') {
+                        oPrice = rowData.OrderPrice - 4000;
+                    }
+
+                    $('#OrderPrice').html(oPrice.toLocaleString());
+
+                    $('#itemTable > tbody').empty();
+
+                    $.ajax({
+                        cache : false,
+                        url : `/api/order/itemlist/${rowData.OrderNo}`,
+                        type : 'GET',
+                        dataType: 'json',
+                        success : function(d) {
+                            d.data.forEach(function(item, index) {
+                                $('#itemTable > tbody:last').append(GetItemSelectHtml(item.ItemNo));
+
+                                $('#itemTable .selectItemNo:last').val(item.ItemNo).trigger('change');
+                                $('#itemTable .inputItemCnt:last').val(item.ItemCnt).trigger('change');
+                            });
+
+                            CalcPrice();
+
+                            $('#itemTable').data('isedit', false);
+                            $('.select2').select2();
+                        },
+                        error: function(xhr, status, error) {
+                            if (xhr.status == 401) {
+                                Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                    location.href = location.href;
+                                });
+                            }
+                            else {
+                                Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                            }
+                        }
+                    });
+                });
+
+                // 상품 번들 불러오기
+                $('#loadBundle').click(function(e) {
+                    e.preventDefault();
+
+                    var bNo = $('#BundleNo').val();
+                    if (bNo == "") {
+                        Swal.fire("확인", "번들을 선택해주세요.", "warning");
+                        return;
+                    }
+
+                    $.ajax({
+                        cache : false,
+                        url : "/api/item/bundle/info/" + bNo,
+                        type : 'GET',
+                        dataType: 'json',
+                        success : function(d) {
+                            d.data.ItemList.forEach(function(item, index) {
+                                $('#itemTable > tbody:last').append(GetItemSelectHtml(item.ItemNo));
+
+                                $('#itemTable .selectItemNo:last').val(item.ItemNo).trigger('change');
+                                $('#itemTable .inputItemCnt:last').val(item.ItemCnt).trigger('change');
+                            });
+
+                            CalcPrice();
+
+                            $('.select2').select2();
+                        },
+                        error: function(xhr, status, error) {
+                            if (xhr.status == 401) {
+                                Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                    location.href = location.href;
+                                });
+                            }
+                            else {
+                                Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                            }
+                        }
+                    });
+
+                    return;
+                });
+
+                //상품 추가
+                $('#addItem').click(function(e) {
+                    e.preventDefault();
+
+                    $('#itemTable > tbody:last').prepend(GetItemSelectHtml());
+
+                    $('.select2').select2();
+                });
+
+                // 상품 변경
+                $('#itemTable').on('change', '.selectItemNo', function(e) {
+                    $('#itemTable').data('isedit', true);
+                    CalcPrice();
+                });
+
+                // 상품 수량 변경
+                $('#itemTable').on('change', '.inputItemCnt', function(e) {
+                    $('#itemTable').data('isedit', true);
+                    CalcPrice();
+                });
+
+                //상품 삭제
+                $('#itemTable').on('click', '.deleteItem', function(e) {
+                    e.preventDefault();
+
+                    $(this).closest('tr').remove();
+
+                    $('#itemTable').data('isedit', true);
+
+                    CalcPrice();
+                });
+
+                //상품 저장
+                $("#form-submit-btn").click(function(e) {
+                    e.preventDefault();
+
+                    //form 유효성 검사
+                    var basicform = $("#form-orderitem")
+
+                    if (basicform[0].checkValidity() === false) {
+                        e.stopPropagation();
+
+                        basicform.addClass('was-validated');
+                        return;
+                    }
+
+                    var basicFormData = basicform.serializeJSON();
+
+                    if (basicFormData.items.length < 1) {
+                        Swal.fire("확인", "상품을 추가해주세요.", "warning");
+                        return;
+                    }
+
+                    $.ajax({
+                        cache : false,
+                        url : "/api/order/item/set",
+                        type : 'POST',
+                        contentType: "application/json; charset=utf-8",
+                        data : JSON.stringify(basicFormData),
+                        dataType: 'json',
+                        success : function(data) {
+                            Swal.fire("Success", "저장 완료!", "success").then(function(result) {
+                                $('#itemTable').data('isedit', false);
+                                dttable.ajax.reload(null, false);
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            if (xhr.status == 401) {
+                                Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                    location.href = location.href;
+                                });
+                            }
+                            else {
+                                Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                            }
+                        }
+                    });
+                });
+            });
+
+        </script>
+    </body>
+    <!-- END Body -->
+</html>
+{{ end }}

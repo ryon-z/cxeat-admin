@@ -1,0 +1,191 @@
+<!-- BEGIN Left Aside -->
+<aside class="page-sidebar">
+    <div class="page-logo">
+        <a href="/" class="page-logo-link press-scale-down d-flex align-items-center position-relative">
+            <img src="/contents/img/favicon/favicon-32x32.png" alt="Yelloment Admin" aria-roledescription="logo">
+            <span class="page-logo-text mr-1">큐잇 Admin</span>
+            <span class="position-absolute text-white opacity-50 small pos-top pos-right mr-2 mt-n2"></span>
+        </a>
+    </div>
+    <!-- BEGIN PRIMARY NAVIGATION -->
+    <nav id="js-primary-nav" class="primary-nav" role="navigation">
+        <div class="nav-filter">
+            <div class="position-relative">
+                <input type="text" id="nav_filter_input" placeholder="Filter menu" class="form-control" tabindex="0">
+                <a href="#" onclick="return false;" class="btn-primary btn-search-close js-waves-off" data-action="toggle" data-class="list-filter-active" data-target=".page-sidebar">
+                    <i class="fal fa-chevron-up"></i>
+                </a>
+            </div>
+        </div>
+        <div class="info-card">
+            {{if .admininfo }}
+            <img src="/contents/img/demo/avatars/avatar-m.png" class="profile-image rounded-circle" alt="{{ .admininfo.AdminName }}">
+            <div class="info-card-text">
+                <a href="#" class="d-flex align-items-center text-white">
+                    <span class="text-truncate text-truncate-sm d-inline-block">
+                        {{ .admininfo.AdminName }}
+                    </span>
+                </a>
+                <span class="d-inline-block text-truncate text-truncate-sm">{{ .admininfo.AdminDept }}</span>
+            </div>
+            {{ end }}
+            <img src="/contents/img/card-backgrounds/cover-2-lg.png" class="cover" alt="cover">
+            <a href="#" onclick="return false;" class="pull-trigger-btn" data-action="toggle" data-class="list-filter-active" data-target=".page-sidebar" data-focus="nav_filter_input">
+                <i class="fal fa-angle-down"></i>
+            </a>
+        </div>
+        <ul id="js-nav-menu" class="nav-menu">
+            <li class='{{ if (.reqURL | contains "/dashboard") }}active open{{end}}'>
+                <a href="/dashboard" title="대시보드" data-filter-tags="대시보드,dashboard">
+                    <i class="far fa-chalkboard-teacher"></i>
+                    <span class="nav-link-text" data-i18n="">대시보드</span>
+                </a>
+            </li>
+            {{ if eq .admininfo.AdminGrade 9 }}
+            <li class='{{ if (.reqURL | contains "/code/") }}active open{{end}}'>
+                <a href="#" title="서비스" data-filter-tags="서비스, service">
+                    <i class="far fa-cog"></i>
+                    <span class="nav-link-text" data-i18n="">서비스</span>
+                </a>
+                <ul>
+                    <li>
+                        <a href="/code/list" title="코드 설정" data-filter-tags="코드 설정,code setting">
+                            <span class="nav-link-text" data-i18n="">코드 설정</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            {{ end }}
+            <li class='{{ if (.reqURL | contains "/user/") }}active open{{end}}'>
+                <a href="#" title="회원" data-filter-tags="회원,user">
+                    <i class="far fa-user"></i>
+                    <span class="nav-link-text" data-i18n="">회원</span>
+                </a>
+                <ul>
+                    <li>
+                        <a href="/user/list" title="회원 관리" data-filter-tags="회원 관리,user">
+                            <span class="nav-link-text" data-i18n="">회원 관리</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/user/leavelist" title="탈퇴,휴면 회원 관리" data-filter-tags="탈퇴 휴면 회원 관리,leave dormancy user">
+                            <span class="nav-link-text" data-i18n="">탈퇴/휴면 회원 관리</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class='{{ if (.reqURL | contains "/item/") }}active open{{end}}'>
+                <a href="#" title="상품" data-filter-tags="상품,item">
+                    <i class="far fa-apple-crate"></i>
+                    <span class="nav-link-text" data-i18n="">상품</span>
+                </a>
+                <ul>
+                    <li>
+                        <a href="/item/list" title="상품 관리" data-filter-tags="상품 관리,item">
+                            <span class="nav-link-text" data-i18n="">상품 관리</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/item/bundle/list" title="상품 번들 관리" data-filter-tags="상품 번들 관리,item bundle">
+                            <span class="nav-link-text" data-i18n="">상품 번들 관리</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class='{{ if (.reqURL | contains "/subs/") }}active open{{end}}'>
+                <a href="#" title="구독" data-filter-tags="구독,subscription">
+                    <i class="far fa-rss-square"></i>
+                    <span class="nav-link-text" data-i18n="">구독</span>
+                </a>
+                <ul>
+                    <li>
+                        <a href="/subs/list" title="구독 관리" data-filter-tags="구독 관리,subscription">
+                            <span class="nav-link-text" data-i18n="">구독 관리</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/subs/cancellist" title="해지 구독 관리" data-filter-tags="해지 구독 관리,subscription cancel">
+                            <span class="nav-link-text" data-i18n="">해지 구독 관리</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class='{{ if (.reqURL | contains "/order/") }}active open{{end}}'>
+                <a href="#" title="주문" data-filter-tags="주문,order">
+                    <i class="far fa-truck"></i>
+                    <span class="nav-link-text" data-i18n="">주문</span>
+                </a>
+                <ul>
+                    <li>
+                        <a href="/order/list" title="주문 내역" data-filter-tags="주문 내역,order list">
+                            <span class="nav-link-text" data-i18n="">주문 내역</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/order/itempickup_v2" title="주문 상품 관리" data-filter-tags="주문 상품,order item">
+                            <span class="nav-link-text" data-i18n="">주문 상품 관리</span>
+                        </a>
+                    </li>
+                    {{/* <li>
+                        <a href="/order/itempickup_v2" title="주문 상품 관리 beta" data-filter-tags="주문 상품,order item">
+                            <span class="nav-link-text" data-i18n="">주문 상품 관리</span>
+                            <span class="dl-ref label bg-warning text-dark ml-2">beta</span>
+                        </a>
+                    </li> */}}
+                    <li>
+                        <a href="/order/payment" title="주문 결제 관리" data-filter-tags="주문 결제,order payment">
+                            <span class="nav-link-text" data-i18n="">주문 결제 관리</span>
+                        </a>
+                    </li>
+                    <li class='{{ if (.reqURL | contains "/order/purchase/") }}active open{{end}}'>
+                        <a href="#" title="주문 배송 관리" data-filter-tags="주문 배송, order delivery">
+                            <span class="nav-link-text" data-i18n="">주문 발주 관리</span>
+                        </a>
+                        <ul>
+                            <li>
+                                <a href="/order/purchase/item" title="원물 발주서" data-filter-tags="주문 원물 발주서, order item purchase">
+                                    <span class="nav-link-text" data-i18n="">원물 발주서</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/order/purchase/itemunpaid" title="원물 발주서+미결제" data-filter-tags="주문 원물 발주서, order item purchase">
+                                    <span class="nav-link-text" data-i18n="">원물 발주서(+미결제)</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/order/purchase/user" title="고객 발주서" data-filter-tags="주문 고객 발주서, order user purchase">
+                                    <span class="nav-link-text" data-i18n="">고객 발주서</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/order/purchase/userunpaid" title="고객 발주서+미결제" data-filter-tags="주문 고객 발주서, order user purchase">
+                                    <span class="nav-link-text" data-i18n="">고객 발주서(+미결제)</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class='{{ if (.reqURL | contains "/order/delivery/") }}active open{{end}}'>
+                        <a href="#" title="주문 배송 관리" data-filter-tags="주문 배송, order delivery">
+                            <span class="nav-link-text" data-i18n="">주문 배송 관리</span>
+                        </a>
+                        <ul>
+                            <li>
+                                <a href="/order/delivery/invoice" title="운송장 관리" data-filter-tags="주문 배송 운송장, order delivery invoice">
+                                    <span class="nav-link-text" data-i18n="">운송장 관리</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/order/delivery/done" title="배송 완료 관리" data-filter-tags="주문 배송 완료, order delivery done complete">
+                                    <span class="nav-link-text" data-i18n="">배송 완료 관리</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <div class="filter-message js-filter-message bg-success-600"></div>
+    </nav>
+    <!-- END PRIMARY NAVIGATION -->
+</aside>
+<!-- END Left Aside -->

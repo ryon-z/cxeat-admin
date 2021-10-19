@@ -1,0 +1,212 @@
+{{ define "code/list.html" }}
+
+<!DOCTYPE html>
+<html lang="ko" class="root-text-sm">
+    <head>
+        {{ template "html-head.tmpl" . }}
+
+        <link rel="stylesheet" media="screen, print" href="/contents/css/datagrid/datatables/datatables.bundle.css">
+    </head>
+
+    <!-- BEGIN Body -->
+    <body class="mod-bg-1 mod-nav-link mod-skin-light">
+
+        {{ template "body-header-script.tmpl" . }}
+
+        <!-- BEGIN Page Wrapper -->
+        <div class="page-wrapper">
+            <div class="page-inner">
+                {{ template "body-left-aside.tmpl" . }}
+
+                <div class="page-content-wrapper">
+
+                    {{ template "page-header.tmpl" . }}
+
+                    <!-- BEGIN Page Content -->
+                    <!-- the #js-page-content id is needed for some plugins to initialize -->
+                    <main id="js-page-content" role="userlist" class="page-content">
+                        <div class="subheader">
+                            <h1 class="subheader-title">
+                                <i class='subheader-icon far fa-user'></i> <span class='fw-500'>코드 관리</span>
+                            </h1>
+                        </div>
+                        <div class="row">
+                            <div class="col-xl-12">
+                                <div id="panel-1" class="panel">
+                                    <div class="panel-hdr">
+                                        <h2>
+                                            <span class="fw-300"><i></i></span>
+                                        </h2>
+                                        <div class="panel-toolbar">
+                                            <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="최소화"></button>
+                                            <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip" data-offset="0,10" data-original-title="전체화면"></button>
+                                        </div>
+                                    </div>
+                                    <div class="panel-container show">
+                                        <div class="panel-content">
+                                            <!-- datatable start -->
+                                            <table id="dt-first" class="table table-bordered table-hover table-striped w-100 text-nowrap">
+                                                <thead class="thead-dark">
+                                                    <tr>
+                                                        <th class="notexport">#</th>
+                                                        <th>코드타입</th>
+                                                        <th>키</th>
+                                                        <th>라벨</th>
+                                                        <th>값</th>
+                                                        <th>값2</th>
+                                                        <th>순서</th>
+                                                        <th>사용여부</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {{ range .list }}
+                                                    <tr>
+                                                        <td>
+                                                            <a class="btn btn-sm btn-primary btn-pills btn-edit-modal" data-editid="{{.CodeNo}}" href="#">수정</a>
+                                                        </td>
+                                                        <td>{{ .CodeTypeDesc }} ({{ .CodeType }})</td>
+                                                        <td>{{ .CodeKey }}</td>
+                                                        <td>{{ .CodeLabel }}</td>
+                                                        <td>{{ default "" .CodeValue }}</td>
+                                                        <td>{{ default "" .CodeValue2 }}</td>
+                                                        <td>{{ .CodeOrder }}</td>
+                                                        <td>
+                                                            {{ if .IsUse }}
+                                                                <h5><span class="badge badge-pill badge-info">활성</span></h5>
+                                                            {{ else }}
+                                                                <h5><span class="badge badge-pill badge-dark">비활성</span></h5>
+                                                            {{ end }}
+                                                        </td>
+                                                    </tr>
+                                                    {{ end }}
+                                                </tbody>
+                                                <tfoot class="thead-dark">
+                                                    <tr>
+                                                        <th class="notexport">#</th>
+                                                        <th>코드타입</th>
+                                                        <th>키</th>
+                                                        <th>라벨</th>
+                                                        <th>값</th>
+                                                        <th>값2</th>
+                                                        <th>순서</th>
+                                                        <th>사용여부</th>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                            <!-- datatable end -->
+                                            <div class="modal fade" id="modal-code-edit" tabindex="0" role="dialog" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                                    <div class="modal-content">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    <!-- this overlay is activated only when mobile menu is triggered -->
+                    <div class="page-content-overlay" data-action="toggle" data-class="mobile-nav-on"></div>
+                    <!-- END Page Content -->
+
+                    {{ template "page-footer.tmpl" . }}
+                </div>
+            </div>
+        </div>
+
+        {{ template "body-footer.tmpl" . }}
+
+        {{ template "body-footer-script.tmpl" . }}
+
+        <script src="/contents/js/datagrid/datatables/datatables.bundle.js"></script>
+        <script src="/contents/js/datagrid/datatables/datatables.export.js"></script>
+        <script>
+            $(document).ready(function()
+            {
+                // initialize datatable
+                $('#dt-first').dataTable(
+                {
+                    pageLength: 25,
+                    oLanguage: {
+                        sEmptyTable: "데이터가 없습니다.",
+                        sInfo: "_START_ 부터 _END_ 까지, 총 _TOTAL_ 개",
+                        sInfoEmpty: "검색 결과 없음",
+                        sInfoFiltered: "(전체 _MAX_ 개 중)",
+                        sThousands: ",",
+                        sLengthMenu: "_MENU_ 개씩 보기",
+                        sLoadingRecords: "Loading...",
+                        sProcessing: "Processing...",
+                        sSearchPlaceholder: "검색",
+                        sZeroRecords: "검색된 내용이 없습니다."
+                    },
+                    dom:"<'row mb-3'<'col-sm-12 col-md-12 d-flex align-items-center justify-content-end'B>>" +
+                        "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'l>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>" +
+                        "<'row mb-3'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                    buttons: [
+                        {
+                            text: '추가',
+                            className: 'btn-outline-danger btn-sm mr-1',
+                            action: function(e, dt, node, cofig) {
+                                showEditModal(0);
+                            }
+                        },
+                        {
+                            extend: 'excelHtml5',
+                            text: 'Excel',
+                            titleAttr: 'Generate Excel',
+                            className: 'btn-outline-success btn-sm mr-1',
+                            exportOptions: {
+                                columns: ':not(.notexport)',
+                            }
+                        },
+
+                    ],
+                    scrollX: true,
+                    scrollCollapse: true,
+                    fixedColumns:
+                    {
+                        leftColumns: 1,
+                    },
+                    stateSave: true,
+                });
+            });
+
+            $('.btn-edit-modal').click(function(e) {
+                e.preventDefault();
+
+                var id = $(this).data('editid');
+
+                showEditModal(id);
+            });
+
+            function showEditModal(id) {
+                $.ajax({
+                    cache : false,
+                    url : '/code/modal_view/'+id,
+                    type : 'GET',
+                    success : function(data) {
+                        $('#modal-code-edit .modal-content').html(data);
+                        $('#modal-code-edit').modal('show');
+                    },
+                    error: function(xhr, status, error) {
+                        if (xhr.status == 401) {
+                            Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                location.href = location.href;
+                            });
+                        }
+                        else {
+                            Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                        }
+                    }
+                });
+            }
+
+        </script>
+
+    </body>
+    <!-- END Body -->
+</html>
+{{ end }}

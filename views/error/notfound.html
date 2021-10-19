@@ -1,0 +1,44 @@
+{{ define "error/notfound.html" }}
+
+<!DOCTYPE html>
+<html lang="ko" class="root-text-sm">
+    <head>
+        {{ template "html-head.tmpl" . }}
+    </head>
+
+    <!-- BEGIN Body -->
+    <body class="">
+        <!-- BEGIN Page Wrapper -->
+        <div class="page-wrapper alt">
+            <!-- BEGIN Page Content -->
+            <!-- the #js-page-content id is needed for some plugins to initialize -->
+            <main id="js-page-content" role="main" class="page-content">
+                <div class="h-alt-f d-flex flex-column align-items-center justify-content-center text-center">
+                    <h1 class="page-error color-fusion-500">
+                        <span class="text-gradient">ERROR</span>
+                    </h1>
+                    <h2 class="fw-500 mb-2 text-break">
+                        찾을 수 없는 페이지
+                    </h2>
+                    <h5 class="mb-5">
+                        페이지가 존재하지 않거나,
+                        <br>올바르지 않은 접근을 하였습니다.
+                        <br>잠시후 다시 시도해보시고 문제가 지속된다면,
+                        <br>담당 부서에 문의 해주세요.
+                    </h5>
+                    <a class="btn btn-primary" href="/">
+                        <span class="fw-500">메인으로</span>
+                    </a>
+                </div>
+            </main>
+            <!-- END Page Content -->
+            {{ template "page-footer.tmpl" . }}
+        </div>
+        <!-- END Page Wrapper -->
+
+        {{ template "body-footer-script.tmpl" . }}
+
+    </body>
+    <!-- END Body -->
+</html>
+{{ end }}

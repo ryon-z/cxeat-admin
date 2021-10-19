@@ -1,0 +1,189 @@
+{{ define "banner/view.html" }}
+
+<!DOCTYPE html>
+<html lang="ko" class="root-text-sm">
+    <head>
+        {{ template "html-head.tmpl" . }}
+    </head>
+
+    <!-- BEGIN Body -->
+    <body class="mod-bg-1 mod-nav-link mod-skin-light">
+
+        {{ template "body-header-script.tmpl" . }}
+
+        <!-- BEGIN Page Wrapper -->
+        <div class="page-wrapper">
+            <div class="page-inner">
+                {{ template "body-left-aside.tmpl" . }}
+
+                <div class="page-content-wrapper">
+
+                    {{ template "page-header.tmpl" . }}
+
+                    <!-- BEGIN Page Content -->
+                    <!-- the #js-page-content id is needed for some plugins to initialize -->
+                    <main id="js-page-content" role="userlist" class="page-content">
+                        <div class="subheader">
+                            <h1 class="subheader-title">
+                                <i class='subheader-icon fal fa-ballot-check'></i> <span class='fw-500'>{{.title}}</span>
+                            </h1>
+                        </div>
+                        <div class="row">
+                            <div class="col-xl-6">
+                                <div id="panel-1" class="panel">
+                                    <div class="panel-hdr">
+                                        <h2>
+                                            배너
+                                        </h2>
+                                        <div class="panel-toolbar">
+                                            <button class="btn btn-panel" data-action="panel-collapse" data-toggle="tooltip" data-offset="0,10" data-original-title="Collapse"></button>
+                                            <button class="btn btn-panel" data-action="panel-fullscreen" data-toggle="tooltip" data-offset="0,10" data-original-title="Fullscreen"></button>
+                                            <button class="btn btn-panel" data-action="panel-close" data-toggle="tooltip" data-offset="0,10" data-original-title="Close"></button>
+                                        </div>
+                                    </div>
+                                    <div class="panel-container show">
+                                        <div class="panel-content">
+                                            <div class="panel-tag">
+                                                Be sure to use an appropriate type attribute on all inputs (e.g., code <code>email</code> for email address or <code>number</code> for numerical information) to take advantage of newer input controls like email verification, number selection, and more.
+                                            </div>
+                                            <form class="needs-validation" id="form-basic" novalidate>
+                                                <input type="hidden" name="BannerNo" id="BannerNo" value="{{ .info.BannerNo }}" />
+                                                <div class="panel-content">
+                                                    <div class="form-row">
+                                                        <div class="col-md-12 mb-3">
+                                                            <label class="form-label" for="BannerTitle">배너명 <span class="text-danger">*</span> </label>
+                                                            <input type="text" class="form-control" name="BannerTitle" id="BannerTitle" placeholder="배너명" value="{{ .info.BannerTitle }}" required>
+                                                            <div class="invalid-feedback">배너명을 입력해주세요</div>
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                            <label class="form-label" for="BannerType">배너타입 <span class="text-danger">*</span> </label>
+                                                            <select class="custom-select" name="BannerType" id="BannerType" required>
+                                                                <option value="">선택</option>
+                                                                <option value="main" {{ if eq .info.BannerType "main" }} selected {{end}}>메인</option>
+                                                                <option value="sub" {{ if eq .info.BannerType "sub" }} selected {{end}}>서브</option>
+                                                                <option value="event" {{ if eq .info.BannerType "event" }} selected {{end}}>이벤트</option>
+                                                            </select>
+                                                            <div class="invalid-feedback">배너타입을 선택해주세요</div>
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                            <label class="form-label" for="BannerCode">배너코드 <span class="text-danger">*</span> </label>
+                                                            <input type="text" class="form-control" name="BannerCode" id="BannerCode" placeholder="배너코드" value="{{ .info.BannerCode }}" required>
+                                                            <div class="invalid-feedback">배너코드를 입력해주세요</div>
+                                                        </div>
+                                                        <div class="col-md-12 mb-3">
+                                                            <label class="form-label" for="BannerDesc">배너 이미지</label>
+                                                            <div class="custom-file">
+                                                                <input type="file" class="custom-file-input" name="BannerImgFile" id="BannerImgFile">
+                                                                <label class="custom-file-label" for="BannerImgFile">파일 선택...</label>
+                                                                <div class="invalid-feedback">배너 이미지 파일을 선택해주세요</div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-12 mb-3">
+                                                            <label class="form-label" for="BannerDesc">배너설명</label>
+                                                            <textarea class="form-control" rows="5" name="BannerDesc" id="BannerDesc" placeholder="배너설명" value="{{ .info.BannerDesc }}"></textarea>
+                                                            <div class="invalid-feedback">배너설명을 입력해주세요</div>
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <label class="form-label mb-3">상태<span class="text-danger">*</span></label>
+                                                            <div class="custom-control custom-radio mb-1">
+                                                                <input type="radio" class="custom-control-input" id="StatusReady" name="StatusCode" value="ready" {{if eq .info.StatusCode "ready"}} checked {{end}} required>
+                                                                <label class="custom-control-label" for="StatusReady">대기</label>
+                                                            </div>
+                                                            <div class="custom-control custom-radio mb-1">
+                                                                <input type="radio" class="custom-control-input" id="StatusNormal" name="StatusCode" value="normal" {{if eq .info.StatusCode "normal"}} checked {{end}} required>
+                                                                <label class="custom-control-label" for="StatusNormal">활성화</label>
+                                                            </div>
+                                                            <div class="custom-control custom-radio mb-1">
+                                                                <input type="radio" class="custom-control-input" id="StatusDisable" name="StatusCode" value="disable" {{if eq .info.StatusCode "disable"}} checked {{end}} required>
+                                                                <label class="custom-control-label" for="StatusDisable">비활성화</label>
+                                                                <div class="invalid-feedback">상태를 선택해주세요</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="panel-content border-faded border-left-0 border-right-0 border-bottom-0 d-flex flex-row align-items-center">
+                                                    <button class="btn btn-primary ml-auto" type="submit" id="form-submit-btn">저장</button>
+                                                    <button class="btn btn-default ml-2" type="button" onclick="javascript:history.back();">취소</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    <!-- this overlay is activated only when mobile menu is triggered -->
+                    <div class="page-content-overlay" data-action="toggle" data-class="mobile-nav-on"></div>
+                    <!-- END Page Content -->
+
+                    {{ template "page-footer.tmpl" . }}
+                </div>
+            </div>
+        </div>
+
+        {{ template "body-footer.tmpl" . }}
+
+        {{ template "body-footer-script.tmpl" . }}
+
+        <script src="/contents/js/formplugins/dropzone/dropzone.js"></script>
+        <script>
+            (function()
+            {
+                'use strict';
+
+            })();
+
+            $(document).ready(function() {
+
+                "use strict";
+
+                $("#form-submit-btn").click(function(event)
+                {
+                    event.preventDefault();
+
+                    //form 유효성 검사
+                    var form = $("#form-basic")
+
+                    if (form[0].checkValidity() === false)
+                    {
+                        event.stopPropagation();
+
+                        form.addClass('was-validated');
+                        return;
+                    }
+
+                    //form submit ajax
+                    var formData = form.serialize();
+
+                    $.ajax({
+                        cache : false,
+                        url : "/api/banner/set",
+                        type : 'POST',
+                        data : formData,
+                        success : function(data) {
+                            console.log(data);
+                            Swal.fire("Success", "등록/수정 완료!", "success").then(function(result) {
+                                if (result.value) {
+                                    location.href="/banner/list";
+                                }
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            if (xhr.status == 401) {
+                                Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                    location.href = location.href;
+                                });
+                            }
+                            else {
+                                Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                            }
+                        }
+                    });
+                });
+            });
+        </script>
+
+    </body>
+    <!-- END Body -->
+</html>
+{{ end }}

@@ -1,0 +1,137 @@
+{{ define "code/view_modal.html" }}
+
+<div class="modal-header">
+    <h4 class="modal-title">
+        코드
+        <small class="m-0 text-muted">
+            Below is a static modal example
+        </small>
+    </h4>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true"><i class="fal fa-times"></i></span>
+    </button>
+</div>
+<div class="modal-body">
+    <form class="needs-validation" id="form-basic" novalidate>
+        <input type="hidden" name="CodeNo" id="CodeNo" value="{{ .info.CodeNo }}" />
+        <div class="panel-content">
+            <div class="form-row">
+                <div class="col-md-12 mb-3">
+                    <label class="form-label" for="CodeType">코드타입 <span class="text-danger">*</span> </label>
+                    <select class="custom-select" name="CodeType" id="CodeType" required>
+                        <option value="">선택</option>
+                        {{ range .typelist }}
+                            <option value="{{.CodeType}}" {{ if eq $.info.CodeType .CodeType }} selected {{end}}>{{.CodeTypeDesc}}({{.CodeType}})</option>
+                        {{ end }}
+                    </select>
+                    <span class="help-block">
+                        코드 타입 추가/삭제가 필요한 경우, 개발팀에 문의
+                    </span>
+                    <div class="invalid-feedback">코드타입을 선택해주세요</div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <label class="form-label" for="CodeKey">코드 키 <span class="text-danger">*</span> </label>
+                    <input type="text" class="form-control" name="CodeKey" id="CodeKey" placeholder="코드 키" value='{{ .info.CodeKey }}' required>
+                    <div class="invalid-feedback">코드 키를 입력해주세요</div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <label class="form-label" for="CodeLabel">코드 라벨</label>
+                    <input type="text" class="form-control" name="CodeLabel" id="CodeLabel" placeholder="코드 라벨" value="{{ .info.CodeLabel }}" required>
+                    <div class="invalid-feedback">코드 라벨을 입력해주세요</div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <label class="form-label" for="CodeValue">코드 값</label>
+                    <input type="text" class="form-control" name="CodeValue" id="CodeValue" placeholder="코드 값" value='{{ default "" .info.CodeValue }}'>
+                    <div class="invalid-feedback">코드 값를 입력해주세요</div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <label class="form-label" for="CodeValue2">코드 값2</label>
+                    <input type="text" class="form-control" name="CodeValue2" id="CodeValue2" placeholder="코드 값2" value='{{ default "" .info.CodeValue2 }}'>
+                    <div class="invalid-feedback">코드 값2를 입력해주세요</div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <label class="form-label" for="CodeOrder">노출 순서</label>
+                    <input type="number" class="form-control" name="CodeOrder" id="CodeOrder" placeholder="노출 순서" value="{{ .info.CodeOrder }}" required>
+                    <div class="invalid-feedback">노출 순서를 입력해주세요</div>
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label mb-3">상태<span class="text-danger">*</span></label>
+                    <div class="custom-control custom-radio mb-1">
+                        <input type="radio" class="custom-control-input" id="StatusFalse" name="IsUse" value="false" {{if not .info.IsUse }} checked {{end}} required>
+                        <label class="custom-control-label" for="StatusFalse">비활성화</label>
+                    </div>
+                    <div class="custom-control custom-radio mb-1">
+                        <input type="radio" class="custom-control-input" id="StatusTrue" name="IsUse" value="true" {{if .info.IsUse }} checked {{end}} required>
+                        <label class="custom-control-label" for="StatusTrue">활성화</label>
+                        <div class="invalid-feedback">상태를 선택해주세요</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel-content border-faded border-left-0 border-right-0 border-bottom-0 d-flex flex-row align-items-center">
+            <button class="btn btn-primary ml-auto" type="submit" id="form-submit-btn">저장</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    (function()
+    {
+        'use strict';
+
+    })();
+
+    $(document).ready(function() {
+
+        "use strict";
+
+        $("#form-submit-btn").click(function(event)
+        {
+            event.preventDefault();
+
+            //form 유효성 검사
+            var form = $("#form-basic")
+
+            if (form[0].checkValidity() === false)
+            {
+                event.stopPropagation();
+
+                form.addClass('was-validated');
+                return;
+            }
+
+            //form submit ajax
+            var formData = form.serialize();
+
+            $.ajax({
+                cache : false,
+                url : "/api/code/set",
+                type : 'POST',
+                data : formData,
+                success : function(data) {
+                    $('.modal').modal('hide');
+
+                    Swal.fire("Success", "등록/수정 완료!", "success").then(function(result) {
+                        if (result.value) {
+                            location.href="/code/list";
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    $('.modal').modal('hide');
+
+                    if (xhr.status == 401) {
+                        Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                            location.href = location.href;
+                        });
+                    }
+                    else {
+                        Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                    }
+                }
+            });
+        });
+    });
+</script>
+
+{{ end }}

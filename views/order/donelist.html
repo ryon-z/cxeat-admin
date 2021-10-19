@@ -1,0 +1,332 @@
+{{ define "order/donelist.html" }}
+
+<!DOCTYPE html>
+<html lang="ko" class="root-text-sm">
+    <head>
+        {{ template "html-head.tmpl" . }}
+
+        <link rel="stylesheet" media="screen, print" href="/contents/css/datagrid/datatables/datatables.bundle.css">
+    </head>
+
+    <!-- BEGIN Body -->
+    <body class="mod-bg-1 mod-nav-link mod-skin-light">
+
+        {{ template "body-header-script.tmpl" . }}
+
+        <!-- BEGIN Page Wrapper -->
+        <div class="page-wrapper">
+            <div class="page-inner">
+                {{ template "body-left-aside.tmpl" . }}
+
+                <div class="page-content-wrapper">
+
+                    {{ template "page-header.tmpl" . }}
+
+                    <!-- BEGIN Page Content -->
+                    <!-- the #js-page-content id is needed for some plugins to initialize -->
+                    <main id="js-page-content" role="userlist" class="page-content">
+                        <div class="subheader">
+                            <h1 class="subheader-title">
+                                <i class='subheader-icon far fa-th-list'></i> <span class='fw-500'>{{.title}}</span>
+                            </h1>
+                        </div>
+                        <div class="row">
+                            <div class="col-xl-12">
+                                <div id="panel-1" class="panel">
+                                    <div class="panel-hdr">
+                                        <h2>
+                                            <span class="fw-300"><i></i></span>
+                                        </h2>
+                                    </div>
+                                    <div class="panel-container show">
+                                        <div class="panel-content">
+                                            <div class="panel-tag">
+                                                배송중이거나, 배송완료된 주문을 확인할 수 있습니다.
+                                            </div>
+                                            <!-- datatable start -->
+                                            <table id="dt-first" class="table table-bordered table-hover table-striped w-100 text-nowrap">
+                                                <thead class="thead-dark">
+                                                </thead>
+                                            </table>
+                                            <!-- datatable end -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    <!-- this overlay is activated only when mobile menu is triggered -->
+                    <div class="page-content-overlay" data-action="toggle" data-class="mobile-nav-on"></div>
+                    <!-- END Page Content -->
+
+                    {{ template "page-footer.tmpl" . }}
+                </div>
+            </div>
+        </div>
+
+        {{ template "body-footer.tmpl" . }}
+
+        {{ template "body-footer-script.tmpl" . }}
+
+        <script src="/contents/js/datagrid/datatables/datatables.bundle.js"></script>
+        <script src="/contents/js/datagrid/datatables/datatables.export.js"></script>
+        <script>
+            $(document).ready(function()
+            {
+                // initialize datatable
+                $('#dt-first').dataTable(
+                {
+                    pageLength: 25,
+                    oLanguage: {
+                        sEmptyTable: "데이터가 없습니다.",
+                        sInfo: "_START_ 부터 _END_ 까지, 총 _TOTAL_ 개",
+                        sInfoEmpty: "검색 결과 없음",
+                        sInfoFiltered: "(전체 _MAX_ 개 중)",
+                        sThousands: ",",
+                        sLengthMenu: "_MENU_ 개씩 보기",
+                        sLoadingRecords: "Loading...",
+                        sProcessing: "Processing...",
+                        sSearchPlaceholder: "검색",
+                        sZeroRecords: "검색된 내용이 없습니다."
+                    },
+                    dom:"<'row mb-3'<'col-sm-12 col-md-12 d-flex align-items-center justify-content-end'B>>" +
+                        "<'row mb-3'<'col-sm-12 col-md-6 d-flex align-items-center justify-content-start'f><'col-sm-12 col-md-6 d-flex align-items-center justify-content-end'l>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>" +
+                        "<'row mb-3'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                    ajax: {
+                        url: "/api/order/list",
+                        data: {
+                            status: "ready-delivery|in-delivery|done",
+                        },
+                        error: function(xhr, status, error) {
+                            if (xhr.status == 401) {
+                                Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                    location.href = location.href;
+                                });
+                            }
+                            else {
+                                Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                            }
+                        }
+                    },
+                    columns: [
+                        {
+                            title: "#",
+                            className: "notexport",
+                            data: "OrderNo",
+                            render: function(data, type, row, meta){
+                                return `<a class="btn btn-sm btn-primary btn-pills" href="/order/view/${row.OrderNo}">상세</a>`;
+                            },
+                            orderable: false,
+                        },
+                        {
+                            title: "No.",
+                            data: "OrderNo",
+                        },
+                        {
+                            title: "회원",
+                            render: function(data, type, row, meta){
+                                return `<a class="" href="/user/view/${row.UserNo}">${row.UserName}</a>`;
+                            },
+                        },
+                        {
+                            title: "유형",
+                            render: function(data, type, row, meta){
+                                return `${row.OrderTypeDesc}<br>${(row.OrderRound)?"(" + row.OrderRound + "회차)":""}`;
+                            },
+                        },
+                        {
+                            title: "금액",
+                            render: function(data, type, row, meta){
+                                return `${row.OrderPrice.toLocaleString()}${(row.DiscountPrice > 0 ? '<br><span class="badge badge-danger badge-pill">할인</span> -' + row.DiscountPrice.toLocaleString() + "<br> = " + (row.OrderPrice - row.DiscountPrice).toLocaleString() : "")}`;
+                            },
+                        },
+                        {
+                            title: "구성",
+                            render: function(data, type, row, meta){
+                                return `${row.BoxTypeDesc}<br>(${row.CateTypeDesc})`;
+                            },
+                        },
+                        {
+                            title: "상품",
+                            data: "ItemsString",
+                            render: function(data, type) {
+                                if(data) {
+                                    return `<span class="badge border border-info text-dark">${data.split('|').join('</span><br><span class="badge border border-info text-dark">')}</span>`;
+                                }
+                                else {
+                                    return "<code>구성된 상품이 없습니다</code>";
+                                }
+                            },
+                        },
+                        {
+                            title: "배송지",
+                            render: function(data, type, row, meta){
+                                return `[ ${row.RcvName} ] ${row.ContactNo}<br>${row.MainAddress}<br>${row.SubAddress}`;
+                            },
+                        },
+                        {
+                            title: "상태",
+                            render: function(data, type, row, meta) {
+                                var str = "";
+
+                                if (row.StatusCode == "init") {
+                                    str = `<span class="badge badge-pill badge-info fs-md">${row.StatusDesc}</span>`;
+                                }
+                                else if (row.StatusCode == "done") {
+                                    str = `<span class="badge badge-pill badge-success fs-md">${row.StatusDesc}</span>`;
+                                }
+                                else if (row.StatusCode.includes("payment")) {
+                                    str = `<span class="badge badge-pill badge-danger fs-md">${row.StatusDesc}</span>`;
+                                }
+                                else if (row.StatusCode.includes("delivery")) {
+                                    str = `<span class="badge badge-pill badge-warning fs-md">${row.StatusDesc}</span>`;
+                                }
+                                else {
+                                    str = `<span class="badge badge-pill badge-dark fs-md">${row.StatusDesc}</span>`;
+                                }
+
+                                return str;
+                            }
+                        },
+                        {
+                            title: "배송정보",
+                            render: function(data, type, row) {
+                                var str = "";
+
+                                if (row.DelivInvoiceNo) {
+                                    str = `[${row.DelivCo}] <a href="${row.DelivUrl}" target="_blank">${row.DelivInvoiceNo}</a>`;
+                                }
+
+                                if (row.StatusCode != "done") {
+                                    str += `<br><button type="button" class="btn btn-sm btn-info mt-2 btnOrderDone" data-orderno="${row.OrderNo}">배송완료 및 리뷰요청 하기</button>`;
+                                }
+
+                                return str;
+                            },
+                        },
+                        {
+                            title: "배송예정일",
+                            data: "ReqDelivDate",
+                            render: function(data, type, row) {
+                                return `${moment(data).format("YYYY-MM-DD")}`;
+                            },
+                        },
+                    ],
+                    buttons: [
+                        {
+                            text: '배송완료 처리',
+                            className: 'btn-outline-danger btn-sm mr-1',
+                            action: function(e, dt, node, cofig) {
+                                Swal.fire({
+                                    title: "배송 완료 처리 확인",
+                                    html: "배송중인 상태의 주문을 배송완료 처리 하시겠습니까?<br>배송완료 처리 및 리뷰 요청 알림을 발송합니다.<br>*배송준비중 주문은 별도로 처리 해주세요.",
+                                    icon: "warning",
+                                    showCancelButton: true,
+                                    confirmButtonText: "네, 배송완료",
+                                    cancelButtonText: "아니요",
+                                    showLoaderOnConfirm: true,
+                                    allowOutsideClick: () => !Swal.isLoading(),
+                                    preConfirm: function preConfirm() {
+                                        return fetch("/api/order/done_bulk", {
+                                            method : 'POST',
+                                            cache : 'no-cache',
+                                        }).then(function(res){
+                                            return res.json();
+                                        }).then(function(data){
+                                            if (data.count > 0) {
+                                                return Swal.fire({
+                                                    icon: "success",
+                                                    title: "성공",
+                                                    text: data.count+"건, 배송완료 처리하였습니다."
+                                                }).then(function(result) {
+                                                    if (result.value) {
+                                                        location.href=location.href;
+                                                    }
+                                                });
+                                            }
+                                            else {
+                                                return Swal.fire({
+                                                    icon: "info",
+                                                    title: "확인",
+                                                    text: "대상 주문이 없습니다."
+                                                });
+                                            }
+                                        }).catch(function() {
+                                            Swal.fire({
+                                                icon: "error",
+                                                title: "실패",
+                                                text: "처리 실패하였습니다."
+                                            });
+                                        });
+                                    },
+                                });
+                            },
+                        },
+                        {
+                            extend: 'excelHtml5',
+                            text: 'Excel',
+                            titleAttr: 'Generate Excel',
+                            className: 'btn-outline-success btn-sm mr-1',
+                            exportOptions: {
+                                columns: ':not(.notexport)',
+                            }
+                        },
+                    ],
+                    scrollX: true,
+                    scrollCollapse: true,
+                    fixedColumns:
+                    {
+                        leftColumns: 1,
+                    },
+                    stateSave: true,
+                });
+
+                $('#dt-first').on('click', '.btnOrderDone', function(e) {
+                    var orderno = $(this).data('orderno');
+
+                    Swal.fire({
+                        title: "배송완료 확인",
+                        html: `배송완료 처리 하시겠습니까?<br>
+                            해당 주문이 배송완료 처리되며, 리뷰요청 알림이 발송됩니다.`,
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "네, 배송완료",
+                        cancelButtonText: "아니요",
+                    }).then(function(result){
+                        if (result.value){
+                            $.ajax({
+                                cache : false,
+                                url : "/api/order/done/" + orderno,
+                                type : 'POST',
+                                dataType: 'json',
+                                success : function(d) {
+                                    Swal.fire("성공", "배송 완료 성공", "success").then(function(result) {
+                                        if (result.value) {
+                                            location.href=location.href;
+                                        }
+                                    });
+                                },
+                                error: function(xhr, status, error) {
+                                    if (xhr.status == 401) {
+                                        Swal.fire("인증실패", "로그인 정보가 확인 되지 않습니다.\n다시 로그인 해주세요.", "error").then(function(result){
+                                            location.href = location.href;
+                                        });
+                                    }
+                                    else {
+                                        Swal.fire("오류", `오류가 발생하였습니다.(${xhr.status} - ${xhr.statusText})`, "error");
+                                    }
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+
+        </script>
+
+    </body>
+    <!-- END Body -->
+</html>
+{{ end }}
